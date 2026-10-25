@@ -17,7 +17,7 @@
 
 Source: feature branch `feat/quest-rank-prototype` in CamrinAI/Career-GAme.
 Review: https://github.com/CamrinAI/Career-GAme/pull/1. No merge performed.
-Pages build is successful; the deploy job returned 404 and explicitly requested enabling GitHub Pages in repository settings. The user has been asked to select GitHub Actions as the Pages publishing source. Deployment must be rerun and verified after this setting is enabled.
+GitHub Pages deployment succeeded on workflow run 40154970190, attempt 3. The user enabled GitHub Actions as the Pages source; the environment allowlist was expanded only to include feat/quest-rank-prototype alongside main. Public preview verified in the browser: https://camrinai.github.io/Career-GAme/. No custom domain is required.
 
 ## Deliberate prototype limits
 
