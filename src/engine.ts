@@ -13,7 +13,7 @@ export function resolveTurn(state:Battle,action:Action,correct=true):Battle {
   const damage=correct?({attack:30,special:65,ultimate:110}[action]):0;
   s.boss=Math.max(0,s.boss-damage);
   if(correct)s.sp=Math.min(100,s.sp+20);
-  if(s.boss===0)return {...s,status:'victory',log:'The seal shatters. The Citadel is yours. +300 XP · +100 mastery.'};
+  if(s.boss===0)return {...s,status:'victory',log:'The seal shatters. The Citadel is yours.'};
   s.phase=s.boss<=120?2:1;
   const retaliation=s.phase===2?26:18;
   s.hp=Math.max(0,s.hp-retaliation);
