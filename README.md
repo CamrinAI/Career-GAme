@@ -1,6 +1,16 @@
-# Quest Rank · v0.1
+# Quest Rank · v0.2
 
 An original solo-first cyber-fantasy learning RPG. Learn identity and access fundamentals in Hunter Academy, practice with explanations, and fight the IAM Warden in the Citadel of Identity.
+
+## New in v0.2: The Hunter's ascent
+
+- **Earned ranks:** E-rank starts your journey; four completed IAM lessons earn D-rank; the Academy, a completed trial at any score, and a Warden victory earn C-rank. B/A/S ranks and their career chapters remain future content. These fictional milestones do not represent exam readiness or credentials.
+- **A visible next objective:** the Nexus directs you to your next incomplete lesson, then the trial, boss fight, and your unlocked perks. Academy navigation resumes the first incomplete lesson.
+- **An optional passive loadout:** earn Aegis Weave after one lesson (+20 maximum HP), Focused Core after a trial (+20 starting SP), and Warden Sigil after a victory (+10 special damage). Equip one at a time in Hunter Profile. Bonuses apply when a battle starts; core commands remain available to everyone.
+- **Milestone journal and reward feedback:** profile shows earned milestones and rank requirements; notifications celebrate new perks and ranks. Replay results explicitly distinguish repeat victories from first-clear rewards.
+- **Save migration:** v1 saves migrate to v2 without losing earned XP, mastery, lessons, wins, names, or preferences. Existing players immediately retain credit for completed milestones; no perk is automatically equipped. Unearned or unknown perks are rejected when loading.
+
+See `VALIDATION-V02.md` for this milestone's checks. `VALIDATION.md` records the earlier v0.1 milestone.
 
 ## Run locally
 
@@ -24,7 +34,7 @@ npm run preview
 - Responsive Nexus, shared navigation and hunter profile.
 - Four IAM lessons, one check each, saved completions, next lesson navigation and revisiting.
 - Six-question randomized Mastery Trial from a twelve-question pool, with immediate explanations and full results review.
-- Warden fight: 120 hunter HP, 240 boss HP, 100 maximum SP; basic, special, defend, ultimate; stronger second phase at 120 boss HP; victory, defeat and replay.
+- Base Warden fight before passive perks: 120 hunter HP, 240 boss HP, 100 maximum SP; basic, special, defend, ultimate; stronger second phase at 120 boss HP; victory, defeat and replay.
 - Correct answers deal damage and restore 20 SP. Incorrect answers spend any skill cost, deal no damage and trigger retaliation. Defend always works, reduces incoming damage by roughly 65% and restores 20 SP. Questions do not repeat until the deck is exhausted.
 - Separate overall XP/level, career mastery, fictional rank and introductory readiness. Each lesson rewards 100 XP/100 mastery, first trial 150 XP/100 mastery, first Warden clear 300 XP/100 mastery. Rewards are once per milestone; replay is unlimited.
 - Versioned browser-local saves, validated loading, save error messaging, explicit confirmed reset, reduced motion and optional synthesized sound. Battle state resets when leaving the arena or refreshing; earned progress persists.
@@ -39,11 +49,13 @@ Vite uses relative asset paths, so the build works under `/Career-GAme/`. There 
 ## Architecture
 
 - `src/main.tsx`: application shell, Nexus, lesson/trial flows, battle UI, profile and settings.
-- `src/engine.ts`: pure battle rules, save validation, rewards and progression helpers.
+- `src/engine.ts`: pure battle rules, perk modifiers, v1-to-v2 save migration, validation, rewards and XP level helpers.
+- `src/progression.ts`: derived Hunter ranks, perk catalog, unlock rules, milestones and next objectives.
+- `src/HunterProgression.tsx`: objective card, rank progress, perk armory and milestone journal.
 - `src/content.ts`: typed educational data, roadmap and official source links.
 - `src/Scenery.tsx`: original replaceable SVG citadel and Warden illustrations.
 - `src/styles.css`: shared design tokens, responsive layouts, effects and reduced motion.
-- `tests/engine.test.ts`: battle outcomes, resources, progression, saves, resets and content integrity.
+- `tests/engine.test.ts` and `tests/progression.test.ts`: battle outcomes, perk effects, unlock rules, ranks, saves, migration, reset and reward limits.
 
 The renderer uses lightweight React/SVG/CSS instead of Phaser in this prototype. The independent battle engine supports a later renderer migration. All illustrations and effects are original; no proprietary game assets are included. Fonts use Google Fonts with system fallbacks. No credentials are needed or included.
 
