@@ -1,6 +1,14 @@
-# Quest Rank · v0.2
+# Quest Rank · v0.2.1
 
 An original solo-first cyber-fantasy learning RPG. Learn identity and access fundamentals in Hunter Academy, practice with explanations, and fight the IAM Warden in the Citadel of Identity.
+
+## New in v0.2.1: Citadel field contracts
+
+C-rank Hunters can complete three optional contracts by defeating the Warden with each earned perk. Each contract awards 75 XP and 25 mastery once. Completing all three unlocks the cosmetic **Citadel Vanguard** profile title; it does not change stats or grant a real credential. Contract buttons equip the required perk and start a new fight. Completed contracts remain replayable without repeated XP rewards.
+
+Version 1 and version 2 saves migrate to version 3 with progress and equipped perks preserved. Older victories retain their rewards but are not assigned an invented perk history; contracts count new victories from this update. A victory that first earns C-rank can also complete its matching contract when that perk was already earned at battle start.
+
+See `VALIDATION-V021.md` for the contract checks. The profile includes shortcuts to contracts and the armory.
 
 ## New in v0.2: The Hunter's ascent
 
@@ -49,13 +57,14 @@ Vite uses relative asset paths, so the build works under `/Career-GAme/`. There 
 ## Architecture
 
 - `src/main.tsx`: application shell, Nexus, lesson/trial flows, battle UI, profile and settings.
-- `src/engine.ts`: pure battle rules, perk modifiers, v1-to-v2 save migration, validation, rewards and XP level helpers.
+- `src/engine.ts`: pure battle rules, perk modifiers, v1/v2-to-v3 save migration, validation, victory/contract rewards and XP level helpers.
 - `src/progression.ts`: derived Hunter ranks, perk catalog, unlock rules, milestones and next objectives.
 - `src/HunterProgression.tsx`: objective card, rank progress, perk armory and milestone journal.
+- `src/Contracts.tsx`: contract board, challenge shortcuts and cosmetic title controls.
 - `src/content.ts`: typed educational data, roadmap and official source links.
 - `src/Scenery.tsx`: original replaceable SVG citadel and Warden illustrations.
 - `src/styles.css`: shared design tokens, responsive layouts, effects and reduced motion.
-- `tests/engine.test.ts` and `tests/progression.test.ts`: battle outcomes, perk effects, unlock rules, ranks, saves, migration, reset and reward limits.
+- `tests/engine.test.ts`, `tests/progression.test.ts` and `tests/contracts.test.ts`: battle outcomes, perk effects, unlock rules, ranks, saves, migration, reset and reward limits.
 
 The renderer uses lightweight React/SVG/CSS instead of Phaser in this prototype. The independent battle engine supports a later renderer migration. All illustrations and effects are original; no proprietary game assets are included. Fonts use Google Fonts with system fallbacks. No credentials are needed or included.
 

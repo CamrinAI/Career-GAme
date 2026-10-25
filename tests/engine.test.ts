@@ -13,7 +13,7 @@ test('lethal hit wins without enemy retaliation',()=>{const s=resolveTurn({...ne
 test('wrong answers can cause defeat and terminal turns are ignored',()=>{let s=newBattle();for(let i=0;i<7;i++)s=resolveTurn(s,'attack',false);assert.equal(s.status,'defeat');assert.equal(s.hp,0);assert.equal(resolveTurn(s,'defend'),s);});
 test('a tactical victory is possible with correct answers',()=>{let s=newBattle();for(const a of ['attack','special','special','defend','special','attack'] as const){s=resolveTurn(s,a,true);}assert.equal(s.status,'victory');assert.ok(s.hp>0);});
 test('resources remain bounded over many defensive turns',()=>{let s=newBattle();for(let i=0;i<30;i++)s=resolveTurn(s,'defend');assert.ok(s.hp>=0);assert.ok(s.sp<=100);});
-test('versioned saves round trip and corrupt/unknown saves recover safely',()=>{const s={...freshSave(),xp:450,completed:[0,2],sound:true};assert.deepEqual(parseSave(JSON.stringify(s)),s);for(const raw of ['garbage','null','{"version":3}'])assert.deepEqual(parseSave(raw),freshSave());});
+test('versioned saves round trip and corrupt/unknown saves recover safely',()=>{const s={...freshSave(),xp:450,completed:[0,2],sound:true};assert.deepEqual(parseSave(JSON.stringify(s)),s);for(const raw of ['garbage','null','{"version":4}'])assert.deepEqual(parseSave(raw),freshSave());});
 test('save validation removes invalid completion values and clamps bad counters',()=>{const s=parseSave(JSON.stringify({version:1,xp:-4,completed:[0,0,3,4,'1',-1],mastery:99999,trialBest:80,wins:'bad',sound:'true'}));assert.deepEqual(s.completed,[0,3]);assert.equal(s.xp,0);assert.equal(s.mastery,1000);assert.equal(s.trialBest,6);assert.equal(s.sound,false);});
 test('rewards are idempotent and character XP is separate from mastery',()=>{const s=reward(freshSave(),'lesson-0',100,100);assert.equal(reward(s,'lesson-0',100,100),s);const t=reward(s,'warden',300,100);assert.equal(t.xp,400);assert.equal(t.mastery,200);assert.equal(levelFor(t.xp),2);});
 test('reset starts an entirely fresh save',()=>{const s=reward(freshSave(),'warden',300,100);assert.equal(s.rewards.length,1);assert.deepEqual(freshSave().rewards,[]);assert.equal(freshSave().xp,0);});
@@ -22,7 +22,7 @@ test('educational content has four lessons, varied questions and valid explanati
 test('legacy v1 saves migrate without dropping progress or settings',()=>{
  const legacy={version:1,xp:850,mastery:600,completed:[0,1,2,3],trialBest:4,wins:2,rewards:['lesson-0','lesson-1','lesson-2','lesson-3','trial','warden'],sound:true,reduced:true,name:'Legacy Hunter',experience:'Some hands-on experience'};
  const migrated=parseSave(JSON.stringify(legacy));
- assert.deepEqual(migrated,{...legacy,version:2,equippedPerk:'none'});
+ assert.deepEqual(migrated,{...legacy,version:3,equippedPerk:'none',clearedContracts:[],cosmeticTitle:'class'});
  assert.deepEqual(parseSave(JSON.stringify(migrated)),migrated);
 });
 test('unknown future save versions recover safely',()=>assert.deepEqual(parseSave('{"version":99}'),freshSave()));
