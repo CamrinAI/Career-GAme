@@ -1,0 +1,1635 @@
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { createRoot } from "react-dom/client";
+import {
+  Activity,
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  Check,
+  ChevronRight,
+  CircleHelp,
+  Cloud,
+  Compass,
+  Crosshair,
+  Flame,
+  Gem,
+  GraduationCap,
+  Hexagon,
+  Home,
+  Layers,
+  LockKeyhole,
+  Map,
+  RotateCcw,
+  Settings,
+  Shield,
+  Sparkles,
+  Swords,
+  Target,
+  Trophy,
+  Users,
+  Volume2,
+  VolumeX,
+  X,
+  Zap,
+} from "lucide-react";
+import {
+  lessons,
+  questions,
+  chapters,
+  sources,
+  type Question,
+} from "./content";
+import {
+  newBattle,
+  resolveTurn,
+  cost,
+  parseSave,
+  freshSave,
+  reward,
+  recordVictory,
+  levelFor,
+  shuffled,
+  type Action,
+  type Save,
+} from "./engine";
+import { RaidHall } from "./RaidHall";
+import { Quiz } from "./Quiz";
+import { Pathfinder } from "./Pathfinder";
+import { Review } from "./Review";
+import { recordAnswer, reviewQuestions } from "./learning";
+import { BackupControls } from "./BackupControls";
+import { ContractBoard } from "./Contracts";
+import { BattleEffects, type BattleCue } from "./BattleEffects";
+import { Scenery, Warden, Hunter } from "./Scenery";
+import {
+  ObjectiveCard,
+  RankProgress,
+  PerkArmory,
+  MilestoneJournal,
+} from "./HunterProgression";
+import {
+  contractsComplete,
+  isPerkUnlocked,
+  nextObjective,
+  perkFor,
+  perks,
+  rankFor,
+  type PerkId,
+} from "./progression";
+import "./styles.css";
+type Page =
+  | "raid"
+  | "pathfinder"
+  | "review"
+  | "nexus"
+  | "academy"
+  | "dungeon"
+  | "roadmap"
+  | "profile";
+const SAVE_KEY = "questrank.save.v1";
+function load() {
+  try {
+    return parseSave(localStorage.getItem(SAVE_KEY));
+  } catch {
+    return freshSave();
+  }
+}
+function Meter({
+  value,
+  max = 100,
+  className = "",
+}: {
+  value: number;
+  max?: number;
+  className?: string;
+}) {
+  return (
+    <div
+      className={"meter " + className}
+      aria-label="Progress"
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={max}
+    >
+      <span style={{ width: `${Math.min(100, (value / max) * 100)}%` }} />
+    </div>
+  );
+}
+function App() {
+  const settingsButton = useRef<HTMLButtonElement>(null);
+  const [save, setSave] = useState<Save>(load);
+  const [academyMode, setAcademyMode] = useState<"learn" | "trial">("learn");
+  const [progressNotice, setProgressNotice] = useState<{
+    title: string;
+    detail: string;
+  } | null>(null);
+  const previousRank = useRef(rankFor(save).rank);
+  const previousPerks = useRef(
+    perks
+      .filter((perk) => isPerkUnlocked(save, perk.id))
+      .map((perk) => perk.id),
+  );
+  const [page, setPage] = useState<Page>(() =>
+    /^[A-HJ-NP-Z2-9]{8}$/.test(
+      new URLSearchParams(location.search).get("raid") || "",
+    )
+      ? "raid"
+      : save.awakened
+        ? "nexus"
+        : "pathfinder",
+  );
+  const [settings, setSettings] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [reset, setReset] = useState(false);
+  useEffect(() => {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(save));
+      setSaveError("");
+    } catch {
+      setSaveError(
+        "Saving is unavailable in this browser. Keep this tab open to retain progress.",
+      );
+    }
+  }, [save]);
+  useEffect(() => {
+    document.documentElement.dataset.motion = save.reduced ? "reduced" : "full";
+  }, [save.reduced]);
+  useEffect(() => {
+    const current = rankFor(save);
+    const order = { E: 0, D: 1, C: 2 };
+    const unlocked = perks.filter((perk) => isPerkUnlocked(save, perk.id));
+    const newlyUnlocked = unlocked.filter(
+      (perk) => !previousPerks.current.includes(perk.id),
+    );
+    if (order[current.rank] > order[previousRank.current])
+      setProgressNotice({
+        title: `${current.rank}-rank awakened · ${current.title}`,
+        detail: newlyUnlocked.length
+          ? `${newlyUnlocked.map((perk) => perk.name).join(" + ")} unlocked. Equip it in Hunter Profile.`
+          : "Your learning milestones earned a new fictional rank.",
+      });
+    else if (newlyUnlocked.length)
+      setProgressNotice({
+        title: `${newlyUnlocked.map((perk) => perk.name).join(" + ")} unlocked`,
+        detail:
+          "Visit Hunter Profile to equip a passive perk for your next battle.",
+      });
+    previousRank.current = current.rank;
+    previousPerks.current = unlocked.map((perk) => perk.id);
+  }, [save]);
+  useEffect(() => {
+    const titles: Record<Page, string> = {
+      raid: "Rift Raids",
+      nexus: "The Nexus",
+      academy: "Hunter Academy",
+      dungeon: "IAM Warden",
+      roadmap: "Career Roadmap",
+      profile: "Hunter Profile",
+      pathfinder: "Career Pathfinder",
+      review: "Practice Journal",
+    };
+    document.title = `Quest Rank · ${titles[page]}`;
+  }, [page]);
+  function closeSettings() {
+    setSettings(false);
+    setReset(false);
+    requestAnimationFrame(() => settingsButton.current?.focus());
+  }
+  function go(p: Page, anchor?: string) {
+    if (p === "academy") setAcademyMode("learn");
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: "instant" });
+    requestAnimationFrame(() => {
+      document.getElementById("main-content")?.focus({ preventScroll: true });
+      if (anchor)
+        document
+          .getElementById(anchor)
+          ?.scrollIntoView({ behavior: "instant", block: "start" });
+    });
+  }
+  function tone() {
+    if (!save.sound) return;
+    try {
+      const a = new AudioContext();
+      const o = a.createOscillator();
+      const g = a.createGain();
+      o.connect(g);
+      g.connect(a.destination);
+      o.frequency.setValueAtTime(440, a.currentTime);
+      o.frequency.exponentialRampToValueAtTime(880, a.currentTime + 0.12);
+      g.gain.setValueAtTime(0.035, a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.2);
+      o.start();
+      o.stop(a.currentTime + 0.2);
+      o.onended = () => void a.close();
+    } catch {
+      /* Sound is optional. */
+    }
+  }
+  function continueObjective() {
+    const objective = nextObjective(save);
+    setAcademyMode(objective.trial ? "trial" : "learn");
+    setPage(objective.destination);
+    window.scrollTo({ top: 0, behavior: "instant" });
+    if (objective.destination === "profile")
+      requestAnimationFrame(() =>
+        document
+          .getElementById(
+            !contractsComplete(save) ? "contracts-title" : "title-reward",
+          )
+          ?.scrollIntoView({ behavior: "instant", block: "start" }),
+      );
+  }
+  function challengeContract(id: PerkId) {
+    if (rankFor(save).rank !== "C" || !isPerkUnlocked(save, id)) return;
+    setSave((s) => ({ ...s, equippedPerk: id }));
+    go("dungeon");
+  }
+  function equipPerk(id: PerkId) {
+    setSave((s) => (isPerkUnlocked(s, id) ? { ...s, equippedPerk: id } : s));
+    tone();
+  }
+  const raidVictory = useCallback(
+    () => setSave((s) => reward(s, "fracture-raid", 150, 0)),
+    [],
+  );
+  const level = levelFor(save.xp);
+  const hunter = rankFor(save);
+  const nav: [Page, string, typeof Home][] = [
+    ["nexus", "The Nexus", Hexagon],
+    ["academy", "Hunter Academy", BookOpen],
+    ["dungeon", "Dungeons", Swords],
+    ["raid", "Rift Raids", Users],
+    ["roadmap", "Career Roadmap", Map],
+    ["profile", "Hunter Profile", Shield],
+    ["review", "Practice Journal", Target],
+    ["pathfinder", "Career Pathfinder", Compass],
+  ];
+  return (
+    <div className="app-shell">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
+      <aside className="sidebar">
+        <a
+          className="brand"
+          href="#nexus"
+          onClick={() => go("nexus")}
+          aria-label="Quest Rank home"
+        >
+          <div className="brand-mark">
+            <Swords size={25} />
+          </div>
+          <div>
+            QUEST<span>RANK</span>
+            <small>YOUR POTENTIAL. AWAKENED.</small>
+          </div>
+        </a>
+        <div className="side-label">HUNTER TERMINAL</div>
+        <nav aria-label="Main navigation">
+          {nav.map(([id, label, Icon]) => (
+            <button
+              key={id}
+              className={"nav-item " + (page === id ? "active" : "")}
+              onClick={() => go(id)}
+              title={label}
+              aria-current={page === id ? "page" : undefined}
+            >
+              <Icon size={18} />
+              {label}
+              {id === "dungeon" && <span className="nav-dot" />}
+            </button>
+          ))}
+        </nav>
+        <div className="campaign-side">
+          <span className="tiny">ACTIVE CAMPAIGN</span>
+          <Cloud size={25} />
+          <strong>Road to Cloud Sovereign</strong>
+          <small>Your next chapter starts here.</small>
+          <Meter value={save.completed.length} max={4} />
+          <div>
+            <span>Citadel of Identity</span>
+            <b>{Math.round((save.completed.length / 4) * 100)}%</b>
+          </div>
+        </div>
+        <div className="side-bottom">
+          <div className="live-label">
+            <span /> NEXUS SYSTEM ONLINE
+          </div>
+          <button
+            ref={settingsButton}
+            title="Settings"
+            className="nav-item"
+            onClick={() => setSettings(true)}
+          >
+            <Settings size={18} />
+            Settings
+          </button>
+          <div className="side-user">
+            <div className="avatar">{save.name[0] || "H"}</div>
+            <div>
+              <strong>{save.name}</strong>
+              <small>
+                {hunter.title} · Lv. {level}
+              </small>
+            </div>
+            <span className="rank-mini">{hunter.rank}</span>
+          </div>
+        </div>
+      </aside>
+      <div className="main-shell">
+        <header className="topbar">
+          <div className="breadcrumb">
+            NEXUS <ChevronRight size={12} />
+            <span>{nav.find((n) => n[0] === page)?.[1]}</span>
+          </div>
+          <div className="top-right">
+            <span className="solo">
+              <span /> SOLO + CO-OP
+            </span>
+            <div className="currency">
+              <Gem size={15} />
+              {save.xp.toLocaleString()} <span>XP</span>
+            </div>
+            <button
+              className="icon-button"
+              onClick={() => setSave({ ...save, sound: !save.sound })}
+              aria-label={save.sound ? "Mute sound" : "Enable sound"}
+            >
+              {save.sound ? <Volume2 size={17} /> : <VolumeX size={17} />}
+            </button>
+            <button
+              className="avatar small"
+              onClick={() => go("profile")}
+              aria-label="Open hunter profile"
+            >
+              {save.name[0] || "H"}
+            </button>
+          </div>
+        </header>
+        <main id="main-content" tabIndex={-1}>
+          {saveError && (
+            <div className="notice" role="alert">
+              {saveError}
+            </div>
+          )}
+          <div hidden={page !== "raid"}>
+            <RaidHall defaultName={save.name} onVictory={raidVictory} />
+          </div>
+          {page === "pathfinder" && (
+            <Pathfinder
+              save={save}
+              onAwaken={(name, experience) => {
+                setSave((s) => ({ ...s, name, experience, awakened: true }));
+                go("nexus");
+              }}
+            />
+          )}
+          {page === "review" && (
+            <Review save={save} setSave={setSave} tone={tone} />
+          )}
+          {page === "nexus" && (
+            <>
+              <div className="page-heading">
+                <div>
+                  <div className="eyebrow">
+                    <span /> YOUR JOURNEY CONTINUES
+                  </div>
+                  <h1>
+                    Welcome to the Nexus<span>.</span>
+                  </h1>
+                  <p>Every skill is a weapon. Every lesson, a level up.</p>
+                </div>
+                <div className="chapter-label">
+                  <span>CAMPAIGN 01</span>
+                  <strong>Road to Cloud Sovereign</strong>
+                </div>
+              </div>
+              <section className="panel nexus-raid-invite">
+                <div>
+                  <span className="eyebrow">NEW · RIFT RAIDS BETA</span>
+                  <h2>Bring your party. Break the fracture.</h2>
+                  <p>
+                    Cloud, nursing, software, and AI roles unite in a shared
+                    boss raid—with hint companions at your side.
+                  </p>
+                </div>
+                <button className="primary" onClick={() => go("raid")}>
+                  <Users size={17} /> Gather your party
+                </button>
+              </section>
+              <section className="hero">
+                <Scenery />
+                <div className="hero-shade" />
+                <div className="hero-content">
+                  <div className="pill">
+                    <Sparkles size={12} /> YOUR ASCENSION BEGINS HERE
+                  </div>
+                  <h2>
+                    Ordinary today.
+                    <br />
+                    <em>Legendary tomorrow.</em>
+                  </h2>
+                  <p>
+                    A new world is waiting. Master real cloud skills,
+                    <br className="desktop" /> conquer the Citadel, and awaken
+                    your potential.
+                  </p>
+                  <div className="hero-actions">
+                    <button className="primary" onClick={continueObjective}>
+                      Continue your journey <ArrowRight size={17} />
+                    </button>
+                    <button
+                      className="text-button"
+                      onClick={() => go("roadmap")}
+                    >
+                      Explore campaign <ArrowUpRight size={15} />
+                    </button>
+                  </div>
+                  <div className="hero-meta">
+                    <span>
+                      <Shield size={13} /> SOLO-FIRST RPG
+                    </span>
+                    <i />
+                    <span>
+                      <Cloud size={14} /> REAL-WORLD SKILLS
+                    </span>
+                    <i />
+                    <span>NO TIME LIMITS</span>
+                  </div>
+                </div>
+                <div className="location">
+                  <span className="location-icon">
+                    <Compass size={20} />
+                  </span>
+                  <div>
+                    <small>YOUR NEXT DESTINATION</small>
+                    <strong>Citadel of Identity</strong>
+                  </div>
+                  <span className="rank-mini">C</span>
+                </div>
+              </section>
+              <section className="stats-grid" aria-label="Hunter statistics">
+                <div className="stat-card">
+                  <div className="stat-icon violet">
+                    <Shield />
+                  </div>
+                  <div>
+                    <span>HUNTER RANK</span>
+                    <h3>
+                      {hunter.rank} <small>{hunter.title}</small>
+                    </h3>
+                    <p>
+                      {hunter.rank === "C"
+                        ? "Citadel ascension complete"
+                        : "Earn your next ascension"}
+                    </p>
+                  </div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon blue">
+                    <Zap />
+                  </div>
+                  <div className="stat-body">
+                    <span>CHARACTER LEVEL</span>
+                    <h3>
+                      {level} <small>{save.xp % 300} / 300 XP</small>
+                    </h3>
+                    <Meter value={save.xp % 300} max={300} />
+                  </div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon teal">
+                    <Target />
+                  </div>
+                  <div>
+                    <span>CAREER MASTERY</span>
+                    <h3>
+                      {save.mastery} <small>/ 1,000 points</small>
+                    </h3>
+                    <p>Cloud skills in the making</p>
+                  </div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon gold">
+                    <Trophy />
+                  </div>
+                  <div>
+                    <span>DUNGEONS CLEARED</span>
+                    <h3>
+                      {save.wins > 0 ? "01" : "00"}{" "}
+                      <small>/ 01 available</small>
+                    </h3>
+                    <p>
+                      {save.wins
+                        ? "The Warden has fallen"
+                        : "Your first victory awaits"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+              <ObjectiveCard save={save} onContinue={continueObjective} />
+              {reviewQuestions(save).length > 0 && (
+                <section className="review-nudge panel">
+                  <BookOpen size={21} />
+                  <div>
+                    <strong>
+                      {reviewQuestions(save).length} concepts are ready for
+                      another look.
+                    </strong>
+                    <p>
+                      Your saved practice journal turns mistakes into your next
+                      step.
+                    </p>
+                  </div>
+                  <button className="secondary" onClick={() => go("review")}>
+                    Review mistakes <ArrowRight size={14} />
+                  </button>
+                </section>
+              )}
+              <div className="section-heading">
+                <h2>Your next quests</h2>
+                <span>SMALL STEPS. REAL PROGRESS.</span>
+              </div>
+              <section className="quest-grid">
+                <article className="quest-card academy-card">
+                  <div className="quest-top">
+                    <div className="quest-symbol">
+                      <GraduationCap size={25} />
+                    </div>
+                    <span className="tag teal-tag">LEARN & GROW</span>
+                  </div>
+                  <div className="tiny">HUNTER ACADEMY</div>
+                  <h3>Knowledge is your power.</h3>
+                  <p>
+                    Learn the art of identity and access.
+                    <br />
+                    Four short lessons. A stronger you.
+                  </p>
+                  <div className="lesson-progress">
+                    <span>{save.completed.length} of 4 lessons complete</span>
+                    <b>{Math.round((save.completed.length / 4) * 100)}%</b>
+                  </div>
+                  <Meter value={save.completed.length} max={4} />
+                  <button className="card-button" onClick={() => go("academy")}>
+                    {save.completed.length
+                      ? "Return to Academy"
+                      : "Enter the Academy"}
+                    <ArrowRight size={16} />
+                  </button>
+                </article>
+                <article className="quest-card dungeon-card">
+                  <div className="quest-top">
+                    <div className="quest-symbol">
+                      <Swords size={24} />
+                    </div>
+                    <span className="tag purple-tag">BOSS ENCOUNTER</span>
+                  </div>
+                  <div className="tiny">CITADEL OF IDENTITY</div>
+                  <h3>The IAM Warden awaits.</h3>
+                  <p>
+                    Turn what you know into what you can do.
+                    <br />
+                    Break the seal. Claim your first victory.
+                  </p>
+                  <div className="boss-mini">
+                    <Shield size={17} />
+                    <span>IAM Warden</span>
+                    <span className="boss-level">C-RANK · 240 HP</span>
+                  </div>
+                  <button className="card-button" onClick={() => go("dungeon")}>
+                    Enter dungeon <ArrowRight size={16} />
+                  </button>
+                </article>
+                <article className="quest-card roadmap-card">
+                  <div className="quest-top">
+                    <div className="quest-symbol">
+                      <Map size={24} />
+                    </div>
+                    <span className="tag gold-tag">YOUR LONG GAME</span>
+                  </div>
+                  <div className="tiny">CAREER PATHFINDER</div>
+                  <h3>From initiate to sovereign.</h3>
+                  <p>
+                    A path with purpose. Discover the skills
+                    <br />
+                    behind your next evolution.
+                  </p>
+                  <div className="rank-path">
+                    {["E", "D", "C", "B", "A", "S"].map((r, i) => (
+                      <React.Fragment key={r}>
+                        {i > 0 && <span />}
+                        <b className={r === hunter.rank ? "current" : ""}>
+                          {r}
+                        </b>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                  <button className="card-button" onClick={() => go("roadmap")}>
+                    View your roadmap <ArrowRight size={16} />
+                  </button>
+                </article>
+              </section>
+              <section className="journey-banner">
+                <div className="banner-icon">
+                  <Flame size={24} />
+                </div>
+                <div>
+                  <h3>Progress at your own pace.</h3>
+                  <p>
+                    No ticking clock. No broken streaks. Just you, getting a
+                    little stronger.
+                  </p>
+                </div>
+                <span>
+                  YOUR JOURNEY. YOUR RULES. <Sparkles size={16} />
+                </span>
+              </section>
+            </>
+          )}
+          {page === "academy" && (
+            <Academy
+              key={academyMode}
+              initialMode={academyMode}
+              save={save}
+              setSave={setSave}
+              tone={tone}
+              go={go}
+            />
+          )}
+          {page === "dungeon" && (
+            <Dungeon save={save} setSave={setSave} tone={tone} go={go} />
+          )}
+          {page === "roadmap" && (
+            <>
+              <PageHeading
+                label="YOUR CAREER CAMPAIGN"
+                title="Road to Cloud Sovereign"
+                sub="Six ranks. A world of possibility. Build skills one chapter at a time."
+              />
+              <div className="roadmap-intro panel">
+                <Cloud size={38} />
+                <div>
+                  <h2>Awaken the Cloud Warden within.</h2>
+                  <p>
+                    Start with the Citadel of Identity. Earn Hunter ranks
+                    through learning milestones while future career chapters are
+                    developed. Fictional ranks reflect your adventure, not
+                    professional credentials.
+                  </p>
+                </div>
+              </div>
+              <div className="roadmap-list">
+                {chapters.map(([rank, title, desc], i) => (
+                  <article
+                    className={
+                      "roadmap-node panel " + (i === 2 ? "featured" : "")
+                    }
+                    key={rank}
+                  >
+                    <div className="large-rank">{rank}</div>
+                    <div>
+                      <div className="eyebrow">
+                        CHAPTER 0{i + 1} ·{" "}
+                        {i === 2 ? "PLAYABLE NOW" : "PLANNED"}
+                      </div>
+                      <h2>{title}</h2>
+                      <p>{desc}</p>
+                    </div>
+                    {i === 2 ? (
+                      <button className="primary" onClick={() => go("academy")}>
+                        Enter the Citadel <ArrowRight size={16} />
+                      </button>
+                    ) : (
+                      <span className="tag">
+                        <LockKeyhole size={12} /> Coming later
+                      </span>
+                    )}
+                  </article>
+                ))}
+              </div>
+              <div className="panel guidance">
+                <h3>A real career beyond the game</h3>
+                <p>
+                  This prototype introduces AWS Cloud Practitioner concepts.
+                  Build hands-on projects, review the current exam guide, and
+                  validate your understanding before booking an exam.
+                  Certification, project experience, and job requirements are
+                  separate. No employment outcome is promised.
+                </p>
+                <a
+                  href="https://aws.amazon.com/certification/certified-cloud-practitioner/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Explore the official certification guide{" "}
+                  <ArrowUpRight size={14} />
+                </a>
+              </div>
+            </>
+          )}
+          {page === "profile" && (
+            <>
+              <PageHeading
+                label="HUNTER DOSSIER"
+                title="Your potential, awakened."
+                sub="Your character grows with every step you take."
+              />
+              <section className="profile-layout">
+                <div className="panel profile-panel">
+                  <div className="portrait">
+                    <Shield size={68} />
+                  </div>
+                  <span className="tag purple-tag">
+                    {hunter.rank}-RANK HUNTER
+                  </span>
+                  <h2>{save.name}</h2>
+                  <p>
+                    {hunter.title} · Level {level}
+                  </p>
+                  {save.cosmeticTitle === "citadel-vanguard" && (
+                    <span className="cosmetic-title">
+                      <Trophy size={12} /> Citadel Vanguard
+                    </span>
+                  )}
+                  <label>
+                    Hunter name
+                    <input
+                      value={save.name}
+                      maxLength={24}
+                      onChange={(e) =>
+                        setSave({ ...save, name: e.target.value })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Cloud experience
+                    <select
+                      value={save.experience}
+                      onChange={(e) =>
+                        setSave({ ...save, experience: e.target.value })
+                      }
+                    >
+                      <option>New to the cloud</option>
+                      <option>Some hands-on experience</option>
+                      <option>Preparing for certification</option>
+                    </select>
+                  </label>
+                </div>
+                <div className="panel profile-details">
+                  <h2>One hunter. Many ways to grow.</h2>
+                  {[
+                    ["Overall experience", `${save.xp} XP`, save.xp % 300, 300],
+                    [
+                      "Career mastery",
+                      `${save.mastery} / 1,000`,
+                      save.mastery,
+                      1000,
+                    ],
+                    [
+                      "Academy progress",
+                      `${save.completed.length} / 4 lessons`,
+                      save.completed.length,
+                      4,
+                    ],
+                    [
+                      "Mastery trial personal best",
+                      `${save.trialBest} / 6 correct`,
+                      save.trialBest,
+                      6,
+                    ],
+                  ].map(([label, text, value, max]) => (
+                    <div className="profile-stat" key={label}>
+                      <div>
+                        <span>{label}</span>
+                        <strong>{text}</strong>
+                      </div>
+                      <Meter value={Number(value)} max={Number(max)} />
+                    </div>
+                  ))}
+                  <div className="notice">
+                    <CircleHelp size={18} />
+                    <span>
+                      Certification readiness: introductory practice only. No
+                      real certification has been earned or verified in Quest
+                      Rank.
+                    </span>
+                  </div>
+                  <h3>Core combat abilities</h3>
+                  <div className="ability-list">
+                    <span>
+                      <Swords size={16} /> Arc strike
+                    </span>
+                    <span>
+                      <Shield size={16} /> Aegis guard
+                    </span>
+                    <span>
+                      <Zap size={16} /> Identity rupture
+                    </span>
+                  </div>
+                  <p className="muted">
+                    Every Hunter can use all four commands. Earn and equip one
+                    passive perk below to shape your next battle.
+                  </p>
+                  <div className="profile-shortcuts">
+                    <a className="secondary armory-link" href="#armory-title">
+                      Manage passive perks <ArrowRight size={14} />
+                    </a>
+                    <a
+                      className="secondary armory-link"
+                      href="#contracts-title"
+                    >
+                      Field contracts <Swords size={14} />
+                    </a>
+                  </div>
+                </div>
+              </section>
+              <RankProgress save={save} />
+              <ContractBoard
+                save={save}
+                onChallenge={challengeContract}
+                onTitle={(title) =>
+                  setSave((s) => ({ ...s, cosmeticTitle: title }))
+                }
+              />
+              <PerkArmory save={save} onEquip={equipPerk} />
+              <MilestoneJournal save={save} />
+            </>
+          )}
+          <footer>
+            <span>
+              <Hexagon size={13} /> QUEST RANK <b>·</b> RIFT RAIDS BETA v1.1
+            </span>
+            <p>An original adventure. Real skills. Limitless potential.</p>
+            <span className="footer-disclaimer">
+              Independent project · Not endorsed by AWS
+            </span>
+          </footer>
+        </main>
+      </div>
+      {progressNotice && (
+        <div className="ascension-toast" role="status">
+          <Trophy size={24} />
+          <div>
+            <span>MILESTONE EARNED</span>
+            <strong>{progressNotice.title}</strong>
+            <small>{progressNotice.detail}</small>
+          </div>
+          <button
+            className="icon-button"
+            onClick={() => setProgressNotice(null)}
+            aria-label="Dismiss milestone notification"
+          >
+            <X size={17} />
+          </button>
+        </div>
+      )}
+      {settings && (
+        <div className="modal-backdrop">
+          <section
+            className="modal panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-title"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") closeSettings();
+              if (e.key === "Tab") {
+                const items = e.currentTarget.querySelectorAll<HTMLElement>(
+                  "button:not(:disabled),input:not(:disabled),a[href]",
+                );
+                const first = items[0],
+                  last = items[items.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                  e.preventDefault();
+                  last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                  e.preventDefault();
+                  first.focus();
+                }
+              }
+            }}
+          >
+            <button
+              autoFocus
+              className="close icon-button"
+              onClick={closeSettings}
+              aria-label="Close settings"
+            >
+              <X />
+            </button>
+            <div className="eyebrow">MAKE IT YOURS</div>
+            <h2 id="settings-title">Nexus settings</h2>
+            <label className="toggle-row">
+              <span>
+                <strong>Sound effects</strong>
+                <small>Gentle feedback for answers and battle actions</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={save.sound}
+                onChange={(e) => setSave({ ...save, sound: e.target.checked })}
+              />
+            </label>
+            <label className="toggle-row">
+              <span>
+                <strong>Reduce motion</strong>
+                <small>Pause scenery, effects, and transitions</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={save.reduced}
+                onChange={(e) =>
+                  setSave({ ...save, reduced: e.target.checked })
+                }
+              />
+            </label>
+            <p className="muted">
+              Progress is saved on this browser and device. Clearing browser
+              data removes your save.
+            </p>
+            <BackupControls
+              save={save}
+              onRestore={(restored) => {
+                setSave(restored);
+                setProgressNotice(null);
+                setReset(false);
+                setSettings(false);
+                go(restored.awakened ? "nexus" : "pathfinder");
+              }}
+            />
+            {reset ? (
+              <div className="notice danger">
+                <p>
+                  Reset all lessons, XP, mastery, victories, ranks, contracts,
+                  titles, and equipped perks? This cannot be undone.
+                </p>
+                <button
+                  className="danger-button"
+                  onClick={() => {
+                    setSave(freshSave());
+                    setProgressNotice(null);
+                    setReset(false);
+                    setSettings(false);
+                    go("pathfinder");
+                  }}
+                >
+                  Reset all progress
+                </button>
+                <button className="text-button" onClick={() => setReset(false)}>
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                className="text-button reset-button"
+                onClick={() => setReset(true)}
+              >
+                <RotateCcw size={15} /> Reset game progress
+              </button>
+            )}
+          </section>
+        </div>
+      )}
+    </div>
+  );
+}
+function PageHeading({
+  label,
+  title,
+  sub,
+}: {
+  label: string;
+  title: string;
+  sub: string;
+}) {
+  return (
+    <div className="page-heading">
+      <div>
+        <div className="eyebrow">
+          <span />
+          {label}
+        </div>
+        <h1>{title}</h1>
+        <p>{sub}</p>
+      </div>
+    </div>
+  );
+}
+function Academy({
+  save,
+  setSave,
+  tone,
+  go,
+  initialMode,
+}: {
+  initialMode: "learn" | "trial";
+  save: Save;
+  setSave: React.Dispatch<React.SetStateAction<Save>>;
+  tone: () => void;
+  go: (p: Page, anchor?: string) => void;
+}) {
+  const [selected, setSelected] = useState(
+    () => [0, 1, 2, 3].find((id) => !save.completed.includes(id)) ?? 0,
+  );
+  const [answer, setAnswer] = useState<number | null>(null);
+  const [trial, setTrial] = useState(initialMode === "trial");
+  const [deck, setDeck] = useState<Question[]>(() =>
+    initialMode === "trial" ? shuffled(questions).slice(0, 6) : [],
+  );
+  const [index, setIndex] = useState(0);
+  const [trialAnswers, setTrialAnswers] = useState<number[]>([]);
+  const [finished, setFinished] = useState(false);
+  function choose(i: number) {
+    setSelected(i);
+    setAnswer(null);
+    setTrial(false);
+    setFinished(false);
+  }
+  function startTrial() {
+    setTrial(true);
+    setDeck(shuffled(questions).slice(0, 6));
+    setTrialAnswers([]);
+    setIndex(0);
+    setAnswer(null);
+    setFinished(false);
+  }
+  function respond(a: number) {
+    if (answer !== null) return;
+    setAnswer(a);
+    setSave((s) =>
+      recordAnswer(
+        s,
+        trial
+          ? deck[index].id
+          : questions.find((q) => q.lesson === selected)!.id,
+        a,
+      ),
+    );
+    tone();
+    if (trial) setTrialAnswers([...trialAnswers, a]);
+  }
+  function complete() {
+    setSave((s) => {
+      const updated = {
+        ...s,
+        completed: [...new Set([...s.completed, selected])],
+      };
+      return reward(updated, `lesson-${selected}`, 100, 100);
+    });
+    if (selected < 3) choose(selected + 1);
+    else startTrial();
+  }
+  function nextTrial() {
+    if (index === 5) {
+      const score = deck.filter((q, i) => q.answer === trialAnswers[i]).length;
+      setSave((s) =>
+        reward(
+          { ...s, trialBest: Math.max(s.trialBest, score) },
+          "trial",
+          150,
+          100,
+        ),
+      );
+      setFinished(true);
+    } else {
+      setIndex(index + 1);
+      setAnswer(null);
+    }
+  }
+  return (
+    <>
+      <PageHeading
+        label="HUNTER ACADEMY"
+        title="Knowledge is your power."
+        sub="Learn a little. Practice a little. Leave a little stronger."
+      />
+      <div className="academy-layout">
+        <aside className="lesson-menu panel">
+          <div className="tiny">CITADEL OF IDENTITY</div>
+          <h3>Your learning path</h3>
+          <Meter value={save.completed.length} max={4} />
+          {lessons.map((lesson, i) => (
+            <button
+              className={
+                "lesson-nav " + (!trial && i === selected ? "selected" : "")
+              }
+              key={lesson.title}
+              onClick={() => choose(i)}
+            >
+              <span
+                className={
+                  "lesson-number " + (save.completed.includes(i) ? "done" : "")
+                }
+              >
+                {save.completed.includes(i) ? (
+                  <Check size={15} />
+                ) : (
+                  String(i + 1).padStart(2, "0")
+                )}
+              </span>
+              <span>
+                {lesson.topic}
+                <small>{lesson.time} · +100 XP</small>
+              </span>
+            </button>
+          ))}
+          <button
+            className={"lesson-nav trial-nav " + (trial ? "selected" : "")}
+            onClick={startTrial}
+          >
+            <Trophy size={22} />
+            <span>
+              Mastery Trial<small>6 questions · +150 XP once</small>
+            </span>
+          </button>
+          <p className="muted">Revisit any lesson. Take as long as you need.</p>
+        </aside>
+        <section className="panel lesson-reader">
+          {trial ? (
+            finished ? (
+              <>
+                <div className="eyebrow">TRIAL COMPLETE</div>
+                <h2>Every answer builds your skill.</h2>
+                <div className="trial-score">
+                  {deck.filter((q, i) => q.answer === trialAnswers[i]).length}
+                  <span>/ 6 correct</span>
+                </div>
+                <p>
+                  Your first trial earns 150 XP, 100 mastery, and the Focused
+                  Core perk at any score. Rewards are granted once. Review your
+                  answers, then equip your perk in Hunter Profile.
+                </p>
+                <div className="trial-review">
+                  {deck.map((q, i) => (
+                    <div key={q.id}>
+                      <span
+                        className={
+                          "review-icon " +
+                          (q.answer === trialAnswers[i] ? "good" : "")
+                        }
+                      >
+                        {q.answer === trialAnswers[i] ? (
+                          <Check size={16} />
+                        ) : (
+                          <BookOpen size={16} />
+                        )}
+                      </span>
+                      <div>
+                        <strong>{q.prompt}</strong>
+                        <p>Your answer: {q.options[trialAnswers[i]]}</p>
+                        <p>
+                          Correct: {q.options[q.answer]}. {q.explanation}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="button-row">
+                  <button className="primary" onClick={() => go("dungeon")}>
+                    Challenge the Warden <Swords size={16} />
+                  </button>
+                  <button className="secondary" onClick={startTrial}>
+                    Practice again
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="reader-meta">
+                  <span className="tag gold-tag">MASTERY TRIAL</span>
+                  <span>QUESTION {index + 1} OF 6</span>
+                </div>
+                <Meter value={index} max={6} />
+                <Quiz
+                  key={deck[index]?.id}
+                  question={deck[index]}
+                  onAnswer={respond}
+                  answered={answer}
+                />
+                {answer !== null && (
+                  <button className="primary" onClick={nextTrial}>
+                    {index === 5 ? "View results" : "Next question"}
+                    <ArrowRight size={16} />
+                  </button>
+                )}
+              </>
+            )
+          ) : (
+            <>
+              <div className="reader-meta">
+                <span className="tag teal-tag">{lessons[selected].tag}</span>
+                <span>
+                  LESSON 0{selected + 1} · {lessons[selected].time}
+                </span>
+              </div>
+              <h2>{lessons[selected].title}</h2>
+              <p className="lesson-lead">{lessons[selected].text}</p>
+              <div className="example">
+                <div className="eyebrow">
+                  <Layers size={14} /> IN THE REAL WORLD
+                </div>
+                <p>{lessons[selected].example}</p>
+              </div>
+              <div className="takeaway">
+                <Sparkles size={18} />
+                <p>{lessons[selected].takeaway}</p>
+              </div>
+              <Quiz
+                question={questions.find((q) => q.lesson === selected)!}
+                onAnswer={respond}
+                answered={answer}
+              />
+              {answer !== null && (
+                <button className="primary" onClick={complete}>
+                  {save.completed.includes(selected)
+                    ? "Continue"
+                    : "Complete lesson · +100 XP"}
+                  <ArrowRight size={16} />
+                </button>
+              )}
+              <a
+                className="source-link"
+                href={sources[selected][1]}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Read the AWS source: {sources[selected][0]}{" "}
+                <ArrowUpRight size={13} />
+              </a>
+            </>
+          )}
+        </section>
+      </div>
+    </>
+  );
+}
+function Dungeon({
+  save,
+  setSave,
+  tone,
+  go,
+}: {
+  save: Save;
+  setSave: React.Dispatch<React.SetStateAction<Save>>;
+  tone: () => void;
+  go: (p: Page, anchor?: string) => void;
+}) {
+  const [battle, setBattle] = useState(() => newBattle(save.equippedPerk));
+  const [runAnswers, setRunAnswers] = useState<
+    { question: Question; chosen: number }[]
+  >([]);
+  const [battlePerk, setBattlePerk] = useState(save.equippedPerk);
+  const [firstClear, setFirstClear] = useState(false);
+  const [contractReward, setContractReward] = useState(false);
+  const [titleUnlocked, setTitleUnlocked] = useState(false);
+  const [deck, setDeck] = useState(() => shuffled(questions));
+  const [cursor, setCursor] = useState(0);
+  const [action, setAction] = useState<Action | null>(null);
+  const [answer, setAnswer] = useState<number | null>(null);
+  const [effect, setEffect] = useState(0);
+  const [cue, setCue] = useState<BattleCue | null>(null);
+  function turn(a: Action, correct = true) {
+    const next = resolveTurn(battle, a, correct);
+    setBattle(next);
+    setEffect((n) => n + 1);
+    setCue({
+      serial: effect + 1,
+      action: a,
+      correct,
+      damage: battle.boss - next.boss,
+      hpLoss: battle.hp - next.hp,
+      phaseShift: battle.phase !== next.phase,
+    });
+    tone();
+    if (next.status === "victory") {
+      setFirstClear(!save.rewards.includes("warden"));
+      const earned = recordVictory(save, battlePerk);
+      setContractReward(
+        earned.clearedContracts.length > save.clearedContracts.length,
+      );
+      setTitleUnlocked(contractsComplete(earned) && !contractsComplete(save));
+      setSave((s) => recordVictory(s, battlePerk));
+    }
+  }
+  function command(a: Action) {
+    if (battle.status !== "active" || action || battle.sp < cost[a]) return;
+    if (a === "defend") {
+      turn(a);
+      return;
+    }
+    setAction(a);
+    setAnswer(null);
+  }
+  function respond(i: number) {
+    if (answer !== null || !action) return;
+    setAnswer(i);
+    setRunAnswers((previous) => [
+      ...previous,
+      { question: deck[cursor], chosen: i },
+    ]);
+    setSave((s) => recordAnswer(s, deck[cursor].id, i));
+    turn(action, i === deck[cursor].answer);
+  }
+  function continueTurn() {
+    setAction(null);
+    setAnswer(null);
+    if (cursor === deck.length - 1) {
+      const last = deck[cursor].id;
+      const next = shuffled(questions);
+      if (next[0].id === last) [next[0], next[1]] = [next[1], next[0]];
+      setDeck(next);
+      setCursor(0);
+    } else setCursor(cursor + 1);
+  }
+  function replay() {
+    setRunAnswers([]);
+    setBattle(newBattle(save.equippedPerk));
+    setBattlePerk(save.equippedPerk);
+    setFirstClear(false);
+    setContractReward(false);
+    setTitleUnlocked(false);
+    setCue(null);
+    setAction(null);
+    setAnswer(null);
+    setDeck(shuffled(questions));
+    setCursor(0);
+  }
+  return (
+    <>
+      <PageHeading
+        label="CITADEL OF IDENTITY · BOSS ENCOUNTER"
+        title="The IAM Warden"
+        sub="The gatekeeper tests your knowledge. Your decisions shape the battle."
+      />
+      <details className="panel encounter-brief">
+        <summary>First time here? Learn the battle in 30 seconds</summary>
+        <ol>
+          <li>
+            <strong>Choose a command.</strong> Arc strike is free. Answer its
+            cloud question to deal damage.
+          </li>
+          <li>
+            <strong>Build your energy.</strong> Correct answers restore 20 SP.
+            Guard restores 20 SP while reducing the next hit.
+          </li>
+          <li>
+            <strong>Time your burst.</strong> Special costs 30 SP; Identity
+            rupture costs 70 SP. Wrong answers still spend energy.
+          </li>
+          <li>
+            <strong>Break the seal.</strong> The Warden gets stronger at half
+            health. Reduce its HP to zero before yours runs out.
+          </li>
+        </ol>
+        <p>
+          No timer. Read every explanation. Defeat keeps your earned progress
+          safe.
+        </p>
+      </details>
+      <div className="battle-loadout">
+        <Shield size={14} />
+        <span>
+          Battle perk: <strong>{perkFor(battlePerk).name}</strong>
+        </span>
+        <span>{perkFor(battlePerk).description}</span>
+      </div>
+      <div className="battle-layout">
+        <section className="arena panel">
+          <Scenery arena />
+          <div className="arena-vignette" />
+          <div className="arena-top">
+            <span className="tag purple-tag">
+              {battle.phase === 2
+                ? "PHASE II · ENRAGED"
+                : "PHASE I · THE GATEKEEPER"}
+            </span>
+            <span>TURN {battle.turn}</span>
+          </div>
+          <div className="boss-health">
+            <div>
+              <span>IAM WARDEN</span>
+              <b>
+                {battle.boss} <small>/ 240 HP</small>
+              </b>
+            </div>
+            <Meter value={battle.boss} max={240} />
+          </div>
+          <div
+            key={effect}
+            className={"combat-actors " + (effect ? "hit" : "")}
+          >
+            <div className="hunter-actor">
+              <Hunter />
+              <span>{save.name}</span>
+            </div>
+            <div className="versus">◆</div>
+            <div className="boss-actor">
+              <Warden />
+            </div>
+          </div>
+          <div className="arena-floor" />
+          <BattleEffects cue={cue} />
+          <div className="hunter-hud">
+            <div className="hud-avatar">
+              <Shield size={24} />
+            </div>
+            <div>
+              <strong>
+                <span className="hud-name">{save.name}</span>
+                <span>LV. {levelFor(save.xp)}</span>
+              </strong>
+              <div className="resource-row">
+                <span>HP</span>
+                <Meter value={battle.hp} max={battle.maxHp} className="hp" />
+                <b>
+                  {battle.hp}/{battle.maxHp}
+                </b>
+              </div>
+              <div className="resource-row">
+                <span>SP</span>
+                <Meter value={battle.sp} className="sp" />
+                <b>{battle.sp}/100</b>
+              </div>
+            </div>
+          </div>
+        </section>
+        <aside className="panel battle-guide">
+          <div className="eyebrow">FIELD NOTES</div>
+          <h3>Read. React. Rise.</h3>
+          <p>
+            Correct answers power attacks and restore 20 SP. Mistakes deal no
+            damage and trigger a counterattack.
+          </p>
+          <div className="guide-stat">
+            <Swords size={17} />
+            <span>
+              Arc strike<b>30 damage · Free</b>
+            </span>
+          </div>
+          <div className="guide-stat">
+            <Zap size={17} />
+            <span>
+              Special skill<b>{65 + battle.specialBonus} damage · 30 SP</b>
+            </span>
+          </div>
+          <div className="guide-stat">
+            <Shield size={17} />
+            <span>
+              Aegis guard<b>65% reduction · +20 SP</b>
+            </span>
+          </div>
+          <div className="guide-stat">
+            <Flame size={17} />
+            <span>
+              Identity rupture<b>110 damage · 70 SP</b>
+            </span>
+          </div>
+          <p className="muted">
+            At half HP, the Warden enters phase II. Expect stronger retaliation.
+            Defending always works without a question.
+          </p>
+          <button className="text-button" onClick={() => go("academy")}>
+            Review the Academy <ArrowUpRight size={14} />
+          </button>
+        </aside>
+      </div>
+      <div className="battle-log panel" role="status" aria-live="polite">
+        <Activity size={19} />
+        <span>{battle.log}</span>
+      </div>
+      {action ? (
+        <section className="panel combat-question">
+          <div className="reader-meta">
+            <span className="tag purple-tag">
+              {action.toUpperCase()} PREPARED
+            </span>
+            <span>NO TIME LIMIT</span>
+          </div>
+          <Quiz question={deck[cursor]} onAnswer={respond} answered={answer} />
+          {answer !== null && (
+            <button className="primary" onClick={continueTurn}>
+              {battle.status === "active"
+                ? "Next command"
+                : "View battle result"}
+              <ArrowRight size={16} />
+            </button>
+          )}
+        </section>
+      ) : battle.status === "active" ? (
+        <div className="command-grid">
+          {(
+            [
+              ["attack", "Arc strike", Swords, "0 SP"],
+              ["special", "Special skill", Zap, "30 SP"],
+              ["defend", "Aegis guard", Shield, "+20 SP"],
+              ["ultimate", "Identity rupture", Flame, "70 SP"],
+            ] as const
+          ).map(([a, label, Icon, sp]) => (
+            <button
+              className={"command " + a}
+              key={a}
+              disabled={battle.sp < cost[a]}
+              onClick={() => command(a)}
+            >
+              <Icon size={23} />
+              <span>
+                {label}
+                <small>
+                  {sp}
+                  {battle.sp < cost[a] ? " · Need more energy" : ""}
+                </small>
+              </span>
+              <ChevronRight size={16} />
+            </button>
+          ))}
+        </div>
+      ) : (
+        <section className={"panel result " + battle.status}>
+          <div className="result-icon">
+            {battle.status === "victory" ? (
+              <Trophy size={38} />
+            ) : (
+              <Shield size={38} />
+            )}
+          </div>
+          <div>
+            <div className="eyebrow">
+              {battle.status === "victory"
+                ? "DUNGEON CLEARED"
+                : "YOU CAN RISE AGAIN"}
+            </div>
+            <h2>
+              {battle.status === "victory"
+                ? "The Citadel is yours."
+                : "A setback, not the end."}
+            </h2>
+            <p>
+              {battle.status === "victory"
+                ? firstClear
+                  ? "First clear! +300 XP, +100 mastery, and Warden Sigil unlocked. Equip your new perk in Hunter Profile."
+                  : "Victory again! Your first-clear rewards are already earned. Try another perk or battle strategy."
+                : "Your earned progress is safe. Review the lessons, build energy with defense, and try again."}
+            </p>
+            {contractReward && (
+              <p className="contract-result">
+                <Sparkles size={15} /> Contract complete! +75 XP · +25 mastery
+                {titleUnlocked ? " · Citadel Vanguard title unlocked." : ""}
+              </p>
+            )}
+          </div>
+          <div className="run-recap">
+            <h3>Your expedition</h3>
+            <p>
+              {battle.turn - 1} commands ·{" "}
+              {
+                runAnswers.filter(
+                  (entry) => entry.chosen === entry.question.answer,
+                ).length
+              }
+              /{runAnswers.length} correct answers · {battle.hp} HP remaining
+            </p>
+            {runAnswers.some(
+              (entry) => entry.chosen !== entry.question.answer,
+            ) ? (
+              <>
+                <p>
+                  Turn this run into your next advantage. Your missed questions
+                  are saved in the Practice Journal.
+                </p>
+                <button className="secondary" onClick={() => go("review")}>
+                  Review missed questions <BookOpen size={16} />
+                </button>
+              </>
+            ) : (
+              <p>
+                {runAnswers.length
+                  ? "Every answer landed. Try a different perk to explore another strategy."
+                  : "Try a free Arc strike to start building energy through questions."}
+              </p>
+            )}
+          </div>
+          <div className="result-actions">
+            <button className="primary" onClick={replay}>
+              <RotateCcw size={16} /> Challenge again
+            </button>
+            {battle.status === "victory" && (
+              <button
+                className="secondary"
+                onClick={() => go("profile", "contracts-title")}
+              >
+                View rewards <Trophy size={15} />
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
+
+createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);

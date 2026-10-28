@@ -1,0 +1,210 @@
+export type Question = {
+  id: string;
+  lesson: number;
+  prompt: string;
+  options: string[];
+  answer: number;
+  explanation: string;
+};
+export const lessons = [
+  {
+    title: "Identity is your first defense",
+    topic: "Users, groups & roles",
+    time: "4 min",
+    tag: "IDENTITY",
+    text: "IAM controls who can access AWS resources and what they can do. An IAM user is an identity within an AWS account. A group is a collection of IAM users that share permissions. A role is an identity that trusted principals can assume to obtain temporary credentials; a role is not tied to one person.",
+    example:
+      "An application running on EC2 needs to read an S3 bucket. Give the instance an IAM role with permission to read that bucket. Avoid embedding long-lived access keys in application code.",
+    takeaway:
+      "Use federation and temporary credentials for people and workloads wherever possible. Groups contain users, not roles.",
+  },
+  {
+    title: "The language of permissions",
+    topic: "Policies & permissions",
+    time: "5 min",
+    tag: "PERMISSIONS",
+    text: "A policy describes permissions. Identity-based policies attach to users, groups, or roles. A policy statement includes Effect, Action, and Resource, with optional conditions. Access starts with an implicit deny. An applicable explicit deny overrides an allow. The complete evaluation also considers boundaries and organization policies.",
+    example:
+      "A report reader can be allowed s3:GetObject on arn:aws:s3:::reports/* without receiving s3:DeleteObject. A bucket policy can also control access to that bucket.",
+    takeaway:
+      "An allow is necessary in the relevant evaluation, but an explicit deny wins. Read the action and resource scope carefully.",
+  },
+  {
+    title: "Small permissions. Strong defenses.",
+    topic: "Least privilege & security",
+    time: "4 min",
+    tag: "SECURITY",
+    text: "Least privilege means granting only the permissions required for a task, on the required resources, for the required time. Start narrow, review access, and remove unused permissions. Protect the root user, enable MFA, and avoid using root credentials for everyday work.",
+    example:
+      "A backup process that uploads files to one bucket needs scoped write permissions, not AdministratorAccess. Review its actual access and tighten its policy over time.",
+    takeaway:
+      "MFA adds an authentication factor. It does not replace authorization policies or make overly broad permissions safe.",
+  },
+  {
+    title: "Every action leaves a trace",
+    topic: "CloudTrail & auditing",
+    time: "5 min",
+    tag: "AUDITING",
+    text: "AWS CloudTrail records account activity and API events for governance and investigation. Event history provides the last 90 days of management events in a Region. Trails and event data stores support additional retention and collection. S3 object-level operations are data events and must be configured separately.",
+    example:
+      "A security team investigates who changed a role policy. They inspect the CloudTrail event, including the principal, event name, time, and source information.",
+    takeaway:
+      "CloudTrail helps answer who did what and when. CloudWatch focuses on operational monitoring such as metrics, logs, and alarms.",
+  },
+];
+const q = (
+  id: string,
+  lesson: number,
+  prompt: string,
+  options: string[],
+  answer: number,
+  explanation: string,
+): Question => ({ id, lesson, prompt, options, answer, explanation });
+export const questions: Question[] = [
+  q(
+    "role",
+    0,
+    "An EC2 application needs temporary access to S3. What should it use?",
+    [
+      "An IAM role attached to the instance",
+      "Root account access keys",
+      "A shared IAM user password",
+    ],
+    0,
+    "An instance role provides temporary credentials to the workload without embedding long-lived keys.",
+  ),
+  q(
+    "group",
+    0,
+    "Which identities can be members of an IAM group?",
+    ["Roles and users", "IAM users", "Other groups"],
+    1,
+    "An IAM group contains IAM users. It cannot contain roles or other groups.",
+  ),
+  q(
+    "temporary",
+    0,
+    "What happens when a principal assumes an IAM role?",
+    [
+      "They become the account root user",
+      "They receive a permanent password",
+      "They receive temporary security credentials",
+    ],
+    2,
+    "Assuming a role issues temporary credentials with the permissions of the role, subject to applicable controls.",
+  ),
+  q(
+    "deny",
+    1,
+    "A request has an applicable allow and an explicit deny. What happens?",
+    ["The explicit deny wins", "The allow wins", "The most recent policy wins"],
+    0,
+    "An applicable explicit deny overrides an allow. Policies are not evaluated by their creation date.",
+  ),
+  q(
+    "action",
+    1,
+    "Which policy element specifies an API operation such as s3:GetObject?",
+    ["Resource", "Action", "Effect"],
+    1,
+    "Action specifies the operations. Resource scopes the targets; Effect specifies Allow or Deny.",
+  ),
+  q(
+    "implicit",
+    1,
+    "No applicable policy allows a request. What is the default result?",
+    ["Read-only access", "Automatic approval", "Implicit deny"],
+    2,
+    "AWS starts with implicit deny. Requests need the appropriate allow and must not be blocked by other applicable controls.",
+  ),
+  q(
+    "least",
+    2,
+    "A service only reads one bucket. Which permission scope is best?",
+    [
+      "Read access to that specific bucket",
+      "AdministratorAccess",
+      "All S3 actions on every bucket",
+    ],
+    0,
+    "Least privilege grants only required actions on required resources. Broad administration is unnecessary.",
+  ),
+  q(
+    "mfa",
+    2,
+    "What does multi-factor authentication improve?",
+    [
+      "The size of an IAM policy",
+      "Authentication security",
+      "Automatic permission grants",
+    ],
+    1,
+    "MFA strengthens authentication with another factor. It does not grant permissions or replace least privilege.",
+  ),
+  q(
+    "root",
+    2,
+    "What is the recommended use of the AWS account root user?",
+    [
+      "Daily application deployments",
+      "Sharing with the whole team",
+      "Only tasks that specifically require root",
+    ],
+    2,
+    "Protect root with MFA and use separate, appropriately scoped identities for everyday tasks.",
+  ),
+  q(
+    "audit",
+    3,
+    "Which service helps investigate who changed an IAM policy?",
+    ["AWS CloudTrail", "Amazon Route 53", "AWS Budgets"],
+    0,
+    "CloudTrail records API activity, including IAM policy changes and information about the acting principal.",
+  ),
+  q(
+    "history",
+    3,
+    "What does CloudTrail Event history provide by default?",
+    [
+      "All S3 object reads forever",
+      "90 days of management events in a Region",
+      "Only CPU metrics",
+    ],
+    1,
+    "Event history provides 90 days of management events. Object-level S3 activity is a separately configured data event.",
+  ),
+  q(
+    "monitor",
+    3,
+    "You need operational CPU alarms for an EC2 instance. Which service fits?",
+    ["IAM groups", "CloudTrail Event history", "Amazon CloudWatch"],
+    2,
+    "CloudWatch provides operational monitoring and alarms. CloudTrail records account API activity for auditing.",
+  ),
+];
+export const chapters = [
+  ["E", "Cloud Initiate", "Cloud fundamentals & shared responsibility"],
+  ["D", "Cloud Apprentice", "Compute, storage, databases & pricing"],
+  ["C", "Cloud Warden", "Identity, permissions & security"],
+  ["B", "Cloud Architect", "Networking, resilience & architecture"],
+  ["A", "Cloud Ascendant", "Operations, deployment & troubleshooting"],
+  ["S", "Cloud Sovereign", "Integrated architecture & capstone"],
+];
+export const sources = [
+  [
+    "IAM roles",
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html",
+  ],
+  [
+    "Policy evaluation",
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html",
+  ],
+  [
+    "IAM security best practices",
+    "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+  ],
+  [
+    "CloudTrail Event history",
+    "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-cloudtrail-events.html",
+  ],
+];
