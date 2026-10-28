@@ -1,4 +1,4 @@
-# Quest Rank · Initial IAM release 1.0
+# Quest Rank · Rift Raids beta 1.1
 
 A solo-first cyber-fantasy learning RPG. Awaken a Cloud Initiate, study identity and access fundamentals, review mistakes, and challenge the IAM Warden in the Citadel of Identity.
 
@@ -6,7 +6,7 @@ A solo-first cyber-fantasy learning RPG. Awaken a Cloud Initiate, study identity
 
 **Review:** https://github.com/CamrinAI/Career-GAme/pull/1
 
-This completes the original five-sprint IAM release. It is not the entire future Cloud Sovereign campaign: the other career chapters, accounts, guilds, 3D hub and cooperative play remain future work.
+The original five-sprint IAM release remains available. This update adds optional 2–4 player cross-career cooperative Rift Raids, four raid roles, three hint companions and 24 original raid questions. Complete non-cloud career curricula, accounts, guilds and a 3D hub remain future work.
 
 ## Run, test and build
 
@@ -20,7 +20,13 @@ npm run build
 npm run preview
 ```
 
-Vite prints the local URL. Production output is `dist/`, with relative assets for GitHub Pages subdirectory hosting. The release has no server, account, payment, or cloud-resource requirement.
+Vite prints the local URL. Production output is `dist/`, with relative assets for GitHub Pages subdirectory hosting. Solo play has no server, account, payment, or cloud-resource requirement. Multiplayer needs internet access to the deployed shared room service; players do not need an account.
+
+## Rift Raids
+
+Choose Cloud Warden, Nurse Sentinel, Software Vanguard, or AI Arcanist. Pick Prism Owl, Cipher Fox, or Lumen Sprite. Host or join an eight-character code, ready up, and coordinate strikes, shields and healing against a shared boss. Each role has six questions. Defeat the boss within six rounds. First victory earns 150 XP once, without granting IAM mastery or a solo clear. The service synchronizes decisions and results; brief refreshes reconnect this tab. The host must remain connected.
+
+Nursing content covers fictional communication and general safety, not clinical care. The new roles are raid experiences, not complete professional training. See `RAID-UPDATE.md` for rules, privacy, sources, limitations and validation.
 
 ## Complete player journey
 
@@ -44,6 +50,8 @@ Progress is stored on this browser/device using the stable storage key `questran
 
 ## Architecture
 
+- `src/raid.ts` / `src/RaidHall.tsx` / `src/useRaidRoom.ts`: pure cooperative rules, original pets, career questions, lobby and service synchronization.
+- `room-service/worker.ts` / `room-service/drizzle`: authenticated room API, concurrency checks and schema migrations.
 - `src/main.tsx`: app shell, Nexus, Academy, battle orchestration, settings and profile.
 - `src/engine.ts`: pure combat, versioned saves, validation, XP/reward and victory rules.
 - `src/content.ts`: typed lessons, questions, roadmap and source links.

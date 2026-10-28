@@ -1,18 +1,20 @@
-# Suggested updates after the initial IAM release
+# Suggested updates after Rift Raids beta 1.1
 
-These are proposed future updates, not unfinished items in the original IAM release. Priorities reflect the current game's limits and learning goals.
+The original IAM solo game remains playable. Cross-career co-op and hint pets are now implemented as a focused beta, with four small raid question sets. They do not yet constitute full new career campaigns.
 
-| Priority | Suggested update | Why it matters | Suggested boundary |
+| Priority | Update | Why it matters | Current boundary |
 | --- | --- | --- | --- |
-| High | Expand the IAM question bank | Twelve questions become familiar after several contract runs | Add reviewed scenarios and varied distractors; keep explanations and sources |
-| High | Add the next learning chapter | Gives C-rank Hunters meaningful new learning instead of only replays | Start with cloud fundamentals/shared responsibility, then a separate chapter boss |
-| High | Resume unfinished battles and trials | Removes the current refresh/navigation restart limitation | Version the complete session state and make reward credit idempotent |
-| High | Independent educational review | Improves accuracy and coverage before broader certification use | Have a qualified reviewer audit every lesson, question and answer explanation |
-| Medium | Playtest battle balance and pacing | Current rules are tested mechanically, but player difficulty preferences vary | Collect voluntary playtest feedback; preserve untimed, forgiving practice |
-| Medium | Expand original art, music and animation | Adds richer character identity and cinematic presentation | Properly licensed/original assets; consider Phaser when complexity justifies it |
-| Medium | Optional account-based save sync | Makes cross-device play easier than manual backups | Add authentication, access controls, export/delete, conflict handling and privacy documentation |
-| Medium | Broader accessibility testing | Automated layout/keyboard checks do not replace assistive-technology feedback | Test screen readers, zoom, touch targets, color perception and motion sensitivity with players |
-| Later | Additional career classes and capstones | Broadens learning after the cloud path is substantial | Build one reviewed campaign at a time; keep fictional progress separate from credentials |
-| Later | Guilds, optional co-op and a 3D Nexus | Adds the social/world features reserved in the brief | Keep solo completion possible; design moderation, privacy and multiplayer rules first |
+| Before submission | Playtest with 2–4 people on separate physical devices and networks | Finds real touch, pacing, comprehension and connection problems | Automated tests and multiple browser clients cannot replace this |
+| Before submission | Independent content review, especially nursing teamwork | Checks wording and educational accuracy | Fictional safety/communication only; no clinical competency claims |
+| High | Expand and vary questions with plausible distractors | Keeps replays useful after the current 24 raid questions become familiar | Keep source links and explanations; no copied exam items |
+| High | Add deeper solo career introductions for nursing, software and AI | Lets players learn before raiding from a new field | Raid roles are available now; complete curricula are future work |
+| High | Persist/resume solo battles and trials | Removes the solo refresh/navigation restart limitation | Raid sessions already reconnect after brief refreshes |
+| High | Add varied boss intentions, encounters and progression | Creates more tactical decisions and reasons to return | Preserve clear rules and the untimed learning loop |
+| Medium | Extend pet collection, progression and solo hints | Makes companions part of the entire game | Three original raid hint companions are available now |
+| Medium | Broader accessibility and usability tests with players | Improves screen-reader, zoom, touch and keyboard confidence | Reduced motion, keyboard controls and narrow layout checks are in place |
+| Medium | Server-side room abuse controls and operational monitoring | Helps manage broader public traffic | Current beta has private session tokens, code invites, caps and expiry; no public matchmaking |
+| Medium | Optional account-based solo save sync | Simplifies switching devices | Local backup/restore works; accounts need separate privacy/access design |
+| Later | More original artwork, music and animated encounters | Builds atmosphere without disrupting the readable learning experience | Original SVG/CSS artwork and optional sound remain in place |
+| Later | Guilds, public matchmaking and a 3D Nexus | Broadens the world when the core is proven | Requires moderation, accessibility and a larger hosting design |
 
-Recommended order: content review and question expansion → next chapter → session resume → playtesting and accessibility → optional account sync and richer presentation → deferred social/world features.
+Recommended next step: schedule a small voluntary playtest, record the exact confusing or broken moments, then improve the most common problems before adding more systems.

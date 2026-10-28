@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import {
   Activity,
@@ -26,6 +26,7 @@ import {
   Swords,
   Target,
   Trophy,
+  Users,
   Volume2,
   VolumeX,
   X,
@@ -51,6 +52,7 @@ import {
   type Action,
   type Save,
 } from "./engine";
+import { RaidHall } from "./RaidHall";
 import { Quiz } from "./Quiz";
 import { Pathfinder } from "./Pathfinder";
 import { Review } from "./Review";
@@ -76,6 +78,7 @@ import {
 } from "./progression";
 import "./styles.css";
 type Page =
+  | "raid"
   | "pathfinder"
   | "review"
   | "nexus"
@@ -128,7 +131,13 @@ function App() {
       .map((perk) => perk.id),
   );
   const [page, setPage] = useState<Page>(() =>
-    save.awakened ? "nexus" : "pathfinder",
+    /^[A-HJ-NP-Z2-9]{8}$/.test(
+      new URLSearchParams(location.search).get("raid") || "",
+    )
+      ? "raid"
+      : save.awakened
+        ? "nexus"
+        : "pathfinder",
   );
   const [settings, setSettings] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -171,6 +180,7 @@ function App() {
   }, [save]);
   useEffect(() => {
     const titles: Record<Page, string> = {
+      raid: "Rift Raids",
       nexus: "The Nexus",
       academy: "Hunter Academy",
       dungeon: "IAM Warden",
@@ -240,12 +250,17 @@ function App() {
     setSave((s) => (isPerkUnlocked(s, id) ? { ...s, equippedPerk: id } : s));
     tone();
   }
+  const raidVictory = useCallback(
+    () => setSave((s) => reward(s, "fracture-raid", 150, 0)),
+    [],
+  );
   const level = levelFor(save.xp);
   const hunter = rankFor(save);
   const nav: [Page, string, typeof Home][] = [
     ["nexus", "The Nexus", Hexagon],
     ["academy", "Hunter Academy", BookOpen],
     ["dungeon", "Dungeons", Swords],
+    ["raid", "Rift Raids", Users],
     ["roadmap", "Career Roadmap", Map],
     ["profile", "Hunter Profile", Shield],
     ["review", "Practice Journal", Target],
@@ -331,7 +346,7 @@ function App() {
           </div>
           <div className="top-right">
             <span className="solo">
-              <span /> SOLO ADVENTURE
+              <span /> SOLO + CO-OP
             </span>
             <div className="currency">
               <Gem size={15} />
@@ -359,6 +374,9 @@ function App() {
               {saveError}
             </div>
           )}
+          <div hidden={page !== "raid"}>
+            <RaidHall defaultName={save.name} onVictory={raidVictory} />
+          </div>
           {page === "pathfinder" && (
             <Pathfinder
               save={save}
@@ -388,6 +406,19 @@ function App() {
                   <strong>Road to Cloud Sovereign</strong>
                 </div>
               </div>
+              <section className="panel nexus-raid-invite">
+                <div>
+                  <span className="eyebrow">NEW · RIFT RAIDS BETA</span>
+                  <h2>Bring your party. Break the fracture.</h2>
+                  <p>
+                    Cloud, nursing, software, and AI roles unite in a shared
+                    boss raid—with hint companions at your side.
+                  </p>
+                </div>
+                <button className="primary" onClick={() => go("raid")}>
+                  <Users size={17} /> Gather your party
+                </button>
+              </section>
               <section className="hero">
                 <Scenery />
                 <div className="hero-shade" />
@@ -828,7 +859,7 @@ function App() {
           )}
           <footer>
             <span>
-              <Hexagon size={13} /> QUEST RANK <b>·</b> INITIAL IAM RELEASE v1.0
+              <Hexagon size={13} /> QUEST RANK <b>·</b> RIFT RAIDS BETA v1.1
             </span>
             <p>An original adventure. Real skills. Limitless potential.</p>
             <span className="footer-disclaimer">
@@ -1245,6 +1276,9 @@ function Dungeon({
   go: (p: Page, anchor?: string) => void;
 }) {
   const [battle, setBattle] = useState(() => newBattle(save.equippedPerk));
+  const [runAnswers, setRunAnswers] = useState<
+    { question: Question; chosen: number }[]
+  >([]);
   const [battlePerk, setBattlePerk] = useState(save.equippedPerk);
   const [firstClear, setFirstClear] = useState(false);
   const [contractReward, setContractReward] = useState(false);
@@ -1290,6 +1324,10 @@ function Dungeon({
   function respond(i: number) {
     if (answer !== null || !action) return;
     setAnswer(i);
+    setRunAnswers((previous) => [
+      ...previous,
+      { question: deck[cursor], chosen: i },
+    ]);
     setSave((s) => recordAnswer(s, deck[cursor].id, i));
     turn(action, i === deck[cursor].answer);
   }
@@ -1305,6 +1343,7 @@ function Dungeon({
     } else setCursor(cursor + 1);
   }
   function replay() {
+    setRunAnswers([]);
     setBattle(newBattle(save.equippedPerk));
     setBattlePerk(save.equippedPerk);
     setFirstClear(false);
@@ -1323,6 +1362,31 @@ function Dungeon({
         title="The IAM Warden"
         sub="The gatekeeper tests your knowledge. Your decisions shape the battle."
       />
+      <details className="panel encounter-brief">
+        <summary>First time here? Learn the battle in 30 seconds</summary>
+        <ol>
+          <li>
+            <strong>Choose a command.</strong> Arc strike is free. Answer its
+            cloud question to deal damage.
+          </li>
+          <li>
+            <strong>Build your energy.</strong> Correct answers restore 20 SP.
+            Guard restores 20 SP while reducing the next hit.
+          </li>
+          <li>
+            <strong>Time your burst.</strong> Special costs 30 SP; Identity
+            rupture costs 70 SP. Wrong answers still spend energy.
+          </li>
+          <li>
+            <strong>Break the seal.</strong> The Warden gets stronger at half
+            health. Reduce its HP to zero before yours runs out.
+          </li>
+        </ol>
+        <p>
+          No timer. Read every explanation. Defeat keeps your earned progress
+          safe.
+        </p>
+      </details>
       <div className="battle-loadout">
         <Shield size={14} />
         <span>
@@ -1511,6 +1575,37 @@ function Dungeon({
               <p className="contract-result">
                 <Sparkles size={15} /> Contract complete! +75 XP · +25 mastery
                 {titleUnlocked ? " · Citadel Vanguard title unlocked." : ""}
+              </p>
+            )}
+          </div>
+          <div className="run-recap">
+            <h3>Your expedition</h3>
+            <p>
+              {battle.turn - 1} commands ·{" "}
+              {
+                runAnswers.filter(
+                  (entry) => entry.chosen === entry.question.answer,
+                ).length
+              }
+              /{runAnswers.length} correct answers · {battle.hp} HP remaining
+            </p>
+            {runAnswers.some(
+              (entry) => entry.chosen !== entry.question.answer,
+            ) ? (
+              <>
+                <p>
+                  Turn this run into your next advantage. Your missed questions
+                  are saved in the Practice Journal.
+                </p>
+                <button className="secondary" onClick={() => go("review")}>
+                  Review missed questions <BookOpen size={16} />
+                </button>
+              </>
+            ) : (
+              <p>
+                {runAnswers.length
+                  ? "Every answer landed. Try a different perk to explore another strategy."
+                  : "Try a free Arc strike to start building energy through questions."}
               </p>
             )}
           </div>
