@@ -1,4 +1,4 @@
-# Quest Rank · Rift Raids beta 1.1
+# Quest Rank · Rift Raids beta 1.1.1
 
 A solo-first cyber-fantasy learning RPG. Awaken a Cloud Initiate, study identity and access fundamentals, review mistakes, and challenge the IAM Warden in the Citadel of Identity.
 
@@ -82,3 +82,9 @@ Independent learning aid, not endorsed by AWS. Fictional ranks and titles do not
 - [Solutions Architect – Associate](https://aws.amazon.com/certification/certified-solutions-architect-associate/)
 
 See `RELEASE-VALIDATION.md` and `SUGGESTED-UPDATES.md`. Earlier milestone notes remain as history. The original repository description is retained in `ORIGINAL_README.md`.
+
+## AI playtest fixes (1.1.1)
+
+Three independent AI playtesters covered solo progression, multiplayer/API behavior, and keyboard/UX flows. Confirmed save loss between tabs, skipped raid results/rewards, stale run commands, invalid request handling and focus/default-name issues were fixed. The release has 67 passing automated tests. Two AI players completed a cross-browser Safari/in-app-browser raid with the revised acknowledgement flow. See `PLAYTEST-REPORT.md` for coverage and remaining limits.
+
+Progress mutations now rebase against the latest local save under a browser Web Lock when available; storage events synchronize other tabs. Explicit reset/restore creates a new local epoch and clears stale active sessions. Backup schema4 remains compatible. Raid debriefs require each member to acknowledge before the host advances/rematches; requests carry run/round scope. Authenticated readers can retrieve the final room snapshot after the host leaves, until room expiry.

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { Check, Crosshair } from "lucide-react";
 import type { Question } from "./content";
 import { shuffled } from "./engine";
@@ -11,6 +11,10 @@ export function Quiz({
   onAnswer: (answer: number) => void;
   answered: number | null;
 }) {
+  const feedback = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (answered !== null) feedback.current?.focus({ preventScroll: true });
+  }, [answered, question.id]);
   const order = useMemo(
     () => shuffled(question.options.map((_, index) => index)),
     [question.id],
@@ -51,6 +55,8 @@ export function Quiz({
           className={
             "feedback " + (answered === question.answer ? "success" : "")
           }
+          ref={feedback}
+          tabIndex={-1}
           role="status"
         >
           <strong>
@@ -58,6 +64,7 @@ export function Quiz({
               ? "Well done, Hunter."
               : "A chance to grow."}
           </strong>
+          <p>Correct answer: {question.options[question.answer]}</p>
           <p>{question.explanation}</p>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Save } from "./engine";
 import {
   ArrowLeft,
@@ -19,6 +19,10 @@ export function Pathfinder({
   const [step, setStep] = useState(0),
     [name, setName] = useState(save.name === "Hunter" ? "" : save.name),
     [experience, setExperience] = useState(save.experience);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (step !== 1) stepHeading.current?.focus({ preventScroll: true });
+  }, [step]);
   const experiences = [
     "New to the cloud",
     "Some hands-on experience",
@@ -62,7 +66,9 @@ export function Pathfinder({
               <Cloud size={42} />
             </div>
             <div className="eyebrow">FIRST CAREER CAMPAIGN</div>
-            <h2>Road to Cloud Sovereign</h2>
+            <h2 ref={stepHeading} tabIndex={-1}>
+              Road to Cloud Sovereign
+            </h2>
             <p>
               Learn the foundations of cloud identity and security in the
               Citadel of Identity. You begin as a Cloud Initiate and earn your
@@ -77,8 +83,9 @@ export function Pathfinder({
               <span className="tag teal-tag">PLAYABLE NOW</span>
             </div>
             <p className="muted">
-              Other career classes and later cloud chapters are planned. This
-              release is solo-first, untimed, and focused on IAM.
+              The solo campaign focuses on IAM. Rift Raids also offers nursing,
+              software, and AI roles; complete solo campaigns for those careers
+              and later cloud chapters are planned.
             </p>
             <button className="primary" onClick={() => setStep(1)}>
               Choose the cloud path <ArrowRight size={16} />
@@ -138,7 +145,9 @@ export function Pathfinder({
               <Compass size={42} />
             </div>
             <div className="eyebrow">YOUR CLASS · CLOUD INITIATE</div>
-            <h2>{name.trim() || "Hunter"}, your potential is awakening.</h2>
+            <h2 ref={stepHeading} tabIndex={-1}>
+              {name.trim() || "Hunter"}, your potential is awakening.
+            </h2>
             <p>
               {experience === "New to the cloud"
                 ? "Start with the short identity lesson, then learn how permissions and auditing protect a cloud environment."

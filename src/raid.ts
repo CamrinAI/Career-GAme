@@ -406,6 +406,8 @@ export type Submission = { move: Move; answer: number };
 export type Raid = {
   version: 1;
   revision: number;
+  run: number;
+  reviewed: string[];
   code: string;
   host: string;
   players: Raider[];
@@ -443,6 +445,8 @@ export function createRaid(code: string, host: Raider): Raid {
   return {
     version: 1,
     revision: 0,
+    run: 1,
+    reviewed: [],
     code,
     host: host.id,
     players: [host],
@@ -463,6 +467,7 @@ export type RaidCommand =
   | { type: "start" }
   | { type: "next" }
   | { type: "rematch" }
+  | { type: "acknowledge" }
   | { type: "hint"; round: number }
   | { type: "answer"; round: number; move: Move; answer: number };
 export function updateRaid(
@@ -473,6 +478,12 @@ export function updateRaid(
   const member = state.players.find((p) => p.id === actor);
   if (!member || !command || typeof command !== "object") return state;
   let next = state;
+  if (
+    command.type === "acknowledge" &&
+    ["review", "victory", "defeat"].includes(state.status) &&
+    !state.reviewed.includes(actor)
+  )
+    next = { ...state, reviewed: [...state.reviewed, actor] };
   if (command.type === "ready" && state.status === "lobby")
     next = {
       ...state,
@@ -540,7 +551,8 @@ export function updateRaid(
   if (
     command.type === "next" &&
     actor === state.host &&
-    state.status === "review"
+    state.status === "review" &&
+    state.players.every((p) => state.reviewed.includes(p.id))
   )
     next = {
       ...state,
@@ -549,17 +561,20 @@ export function updateRaid(
       submissions: {},
       hinted: [],
       results: [],
+      reviewed: [],
       players: state.players.map((p) => ({ ...p, submitted: false })),
       log: "A new fracture opens. Coordinate your next move.",
     };
   if (
     command.type === "rematch" &&
     actor === state.host &&
-    ["victory", "defeat"].includes(state.status)
+    ["victory", "defeat"].includes(state.status) &&
+    state.players.every((p) => state.reviewed.includes(p.id))
   )
     next = {
       ...createRaid(state.code, state.players[0]),
       revision: state.revision,
+      run: state.run + 1,
       players: state.players.map((p) => player(p.id, p.name, p.career, p.pet)),
     };
   return next === state ? state : { ...next, revision: state.revision + 1 };

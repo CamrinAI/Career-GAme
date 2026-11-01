@@ -32,6 +32,11 @@ function round(state: Raid, move: Move = "strike", correct = true) {
     });
   return state;
 }
+function reviewed(state: Raid) {
+  for (const member of state.players)
+    state = updateRaid(state, member.id, { type: "acknowledge" });
+  return state;
+}
 test("all four raid careers have six well-formed questions, varied correct choices and hints", () => {
   for (const id of Object.keys(careers) as Career[]) {
     assert.equal(raidQuestions[id].length, 6);
@@ -102,7 +107,7 @@ test("rounds resolve only when everyone submits; duplicates and stale rounds are
   assert.equal(s.boss, start.boss - 110);
   assert.equal(s.players[0].correct, 1);
   assert.equal(updateRaid(s, "p1", { type: "next" }), s);
-  s = updateRaid(s, "host", { type: "next" });
+  s = updateRaid(reviewed(s), "host", { type: "next" });
   assert.equal(s.round, 2);
   assert.deepEqual(s.submissions, {});
 });
@@ -113,7 +118,7 @@ test("hints are limited to one each round, cannot follow submission and grant AI
   assert.equal(s.players[0].hints, 3);
   assert.equal(updateRaid(s, "host", { type: "hint", round: 1 }), s);
   s = round(s);
-  s = updateRaid(s, "host", { type: "next" });
+  s = updateRaid(reviewed(s), "host", { type: "next" });
   s = updateRaid(s, "host", {
     type: "answer",
     round: 2,
@@ -170,7 +175,8 @@ test("a coordinated raid can win; lethal damage skips retaliation and terminal c
   let s = party(["software", "software"]);
   while (s.status !== "victory") {
     s = round(s);
-    if (s.status === "review") s = updateRaid(s, "host", { type: "next" });
+    if (s.status === "review")
+      s = updateRaid(reviewed(s), "host", { type: "next" });
     else break;
   }
   assert.equal(s.status, "victory");
@@ -210,7 +216,7 @@ test("host rematch resets hints and health, keeps party and code, and requires r
   let s = party(["software", "software"]);
   s = { ...s, status: "victory", boss: 0 };
   assert.equal(updateRaid(s, "p1", { type: "rematch" }), s);
-  const next = updateRaid(s, "host", { type: "rematch" });
+  const next = updateRaid(reviewed(s), "host", { type: "rematch" });
   assert.equal(next.code, s.code);
   assert.equal(next.players.length, 2);
   assert.equal(next.status, "lobby");
@@ -234,4 +240,19 @@ test("disconnect removes that member and can release a submitted round without r
   assert.equal(s.status, "review");
   assert.equal(s.maxBoss, max);
   assert.equal(removeRaider(s, "host"), s);
+});
+
+test("host cannot skip teammates debriefs or victory by advancing early", () => {
+  let s = round(party());
+  assert.equal(updateRaid(s, "host", { type: "next" }), s);
+  s = updateRaid(s, "host", { type: "acknowledge" });
+  assert.equal(updateRaid(s, "host", { type: "next" }), s);
+  s = updateRaid(s, "p1", { type: "acknowledge" });
+  assert.equal(updateRaid(s, "host", { type: "next" }).round, 2);
+  s = { ...s, status: "victory" };
+  s.reviewed = [];
+  assert.equal(updateRaid(s, "host", { type: "rematch" }), s);
+  const next = updateRaid(reviewed(s), "host", { type: "rematch" });
+  assert.equal(next.run, s.run + 1);
+  assert.deepEqual(next.reviewed, []);
 });

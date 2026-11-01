@@ -15,6 +15,7 @@ export function useRaidRoom() {
   const generation = useRef(0);
   const commandPending = useRef(false);
   function publish(next: Raid) {
+    next = { ...next, run: next.run ?? 1, reviewed: next.reviewed ?? [] };
     if (state.current && next.revision < state.current.revision) return;
     state.current = next;
     setRoom(next);
@@ -69,6 +70,14 @@ export function useRaidRoom() {
       }
   }
   useEffect(() => {
+    const replaced = () => {
+      void leave();
+    };
+    window.addEventListener("questrank:progress-replaced", replaced);
+    return () =>
+      window.removeEventListener("questrank:progress-replaced", replaced);
+  }, []);
+  useEffect(() => {
     let alive = true,
       timer: ReturnType<typeof setTimeout>;
     let heartbeat = 0;
@@ -101,8 +110,19 @@ export function useRaidRoom() {
             session.current === active
           ) {
             publish(data.room);
-            setStatus("Connected · room sync active");
-            setError("");
+            setStatus(
+              data.closed ? "Room ended" : "Connected · room sync active",
+            );
+            if (data.closed) {
+              try {
+                sessionStorage.removeItem(SESSION);
+              } catch {}
+              session.current = null;
+              setError(
+                "The host left or disconnected. Your final results are available below.",
+              );
+            }
+            if (!data.closed) setError("");
             if (beat) heartbeat = Date.now();
           }
         } catch (err) {
@@ -181,10 +201,10 @@ export function useRaidRoom() {
     try {
       const data = await request(
         "/api/rooms/" + active.code + "/command",
-        { command },
+        { command, run: state.current?.run, round: state.current?.round },
         active.token,
       );
-      if (stamp === generation.current) {
+      if (stamp === generation.current && session.current === active) {
         publish(data.room);
         setStatus("Connected · room sync active");
         setError("");

@@ -43,7 +43,6 @@ import {
   newBattle,
   resolveTurn,
   cost,
-  parseSave,
   freshSave,
   reward,
   recordVictory,
@@ -52,6 +51,7 @@ import {
   type Action,
   type Save,
 } from "./engine";
+import { useSavedProgress } from "./useSavedProgress";
 import { RaidHall } from "./RaidHall";
 import { Quiz } from "./Quiz";
 import { Pathfinder } from "./Pathfinder";
@@ -86,14 +86,6 @@ type Page =
   | "dungeon"
   | "roadmap"
   | "profile";
-const SAVE_KEY = "questrank.save.v1";
-function load() {
-  try {
-    return parseSave(localStorage.getItem(SAVE_KEY));
-  } catch {
-    return freshSave();
-  }
-}
 function Meter({
   value,
   max = 100,
@@ -118,7 +110,13 @@ function Meter({
 }
 function App() {
   const settingsButton = useRef<HTMLButtonElement>(null);
-  const [save, setSave] = useState<Save>(load);
+  const { save, epoch, setSave, saveError } = useSavedProgress();
+  function changeSetting<K extends "name" | "experience" | "sound" | "reduced">(
+    key: K,
+    value: Save[K],
+  ) {
+    setSave((s) => ({ ...s, [key]: value }));
+  }
   const [academyMode, setAcademyMode] = useState<"learn" | "trial">("learn");
   const [progressNotice, setProgressNotice] = useState<{
     title: string;
@@ -140,18 +138,7 @@ function App() {
         : "pathfinder",
   );
   const [settings, setSettings] = useState(false);
-  const [saveError, setSaveError] = useState("");
   const [reset, setReset] = useState(false);
-  useEffect(() => {
-    try {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(save));
-      setSaveError("");
-    } catch {
-      setSaveError(
-        "Saving is unavailable in this browser. Keep this tab open to retain progress.",
-      );
-    }
-  }, [save]);
   useEffect(() => {
     document.documentElement.dataset.motion = save.reduced ? "reduced" : "full";
   }, [save.reduced]);
@@ -354,7 +341,7 @@ function App() {
             </div>
             <button
               className="icon-button"
-              onClick={() => setSave({ ...save, sound: !save.sound })}
+              onClick={() => setSave((s) => ({ ...s, sound: !s.sound }))}
               aria-label={save.sound ? "Mute sound" : "Enable sound"}
             >
               {save.sound ? <Volume2 size={17} /> : <VolumeX size={17} />}
@@ -375,10 +362,15 @@ function App() {
             </div>
           )}
           <div hidden={page !== "raid"}>
-            <RaidHall defaultName={save.name} onVictory={raidVictory} />
+            <RaidHall
+              key={epoch}
+              defaultName={save.name}
+              onVictory={raidVictory}
+            />
           </div>
           {page === "pathfinder" && (
             <Pathfinder
+              key={epoch}
               save={save}
               onAwaken={(name, experience) => {
                 setSave((s) => ({ ...s, name, experience, awakened: true }));
@@ -387,7 +379,7 @@ function App() {
             />
           )}
           {page === "review" && (
-            <Review save={save} setSave={setSave} tone={tone} />
+            <Review key={epoch} save={save} setSave={setSave} tone={tone} />
           )}
           {page === "nexus" && (
             <>
@@ -650,7 +642,7 @@ function App() {
           )}
           {page === "academy" && (
             <Academy
-              key={academyMode}
+              key={epoch + academyMode}
               initialMode={academyMode}
               save={save}
               setSave={setSave}
@@ -659,7 +651,13 @@ function App() {
             />
           )}
           {page === "dungeon" && (
-            <Dungeon save={save} setSave={setSave} tone={tone} go={go} />
+            <Dungeon
+              key={epoch}
+              save={save}
+              setSave={setSave}
+              tone={tone}
+              go={go}
+            />
           )}
           {page === "roadmap" && (
             <>
@@ -758,9 +756,7 @@ function App() {
                     <input
                       value={save.name}
                       maxLength={24}
-                      onChange={(e) =>
-                        setSave({ ...save, name: e.target.value })
-                      }
+                      onChange={(e) => changeSetting("name", e.target.value)}
                     />
                   </label>
                   <label>
@@ -768,7 +764,7 @@ function App() {
                     <select
                       value={save.experience}
                       onChange={(e) =>
-                        setSave({ ...save, experience: e.target.value })
+                        changeSetting("experience", e.target.value)
                       }
                     >
                       <option>New to the cloud</option>
@@ -859,7 +855,7 @@ function App() {
           )}
           <footer>
             <span>
-              <Hexagon size={13} /> QUEST RANK <b>·</b> RIFT RAIDS BETA v1.1
+              <Hexagon size={13} /> QUEST RANK <b>·</b> RIFT RAIDS BETA v1.1.1
             </span>
             <p>An original adventure. Real skills. Limitless potential.</p>
             <span className="footer-disclaimer">
@@ -928,7 +924,7 @@ function App() {
               <input
                 type="checkbox"
                 checked={save.sound}
-                onChange={(e) => setSave({ ...save, sound: e.target.checked })}
+                onChange={(e) => changeSetting("sound", e.target.checked)}
               />
             </label>
             <label className="toggle-row">
@@ -939,9 +935,7 @@ function App() {
               <input
                 type="checkbox"
                 checked={save.reduced}
-                onChange={(e) =>
-                  setSave({ ...save, reduced: e.target.checked })
-                }
+                onChange={(e) => changeSetting("reduced", e.target.checked)}
               />
             </label>
             <p className="muted">

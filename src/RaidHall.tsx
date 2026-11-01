@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -136,6 +136,15 @@ export function RaidHall({
     send,
   } = useRaidRoom();
   const [name, setName] = useState(defaultName.slice(0, 20));
+  const customName = useRef(false);
+  useEffect(() => {
+    if (!customName.current && !room) setName(defaultName.slice(0, 20));
+  }, [defaultName, room === null]);
+  const contributionHeading = useRef<HTMLHeadingElement>(null);
+  const reviewStatus = useRef<HTMLParagraphElement>(null);
+  const questionHeading = useRef<HTMLHeadingElement>(null);
+  const debriefHeading = useRef<HTMLHeadingElement>(null);
+  const hintText = useRef<HTMLDivElement>(null);
   const [career, setCareer] = useState<Career>("cloud");
   const [pet, setPet] = useState<Pet>("owl");
   const [code, setCode] = useState(
@@ -168,6 +177,22 @@ export function RaidHall({
   useEffect(() => {
     if (room?.status === "victory") onVictory();
   }, [room?.status, onVictory]);
+  useEffect(() => {
+    if (room?.status === "active")
+      questionHeading.current?.focus({ preventScroll: true });
+    else if (revealed) debriefHeading.current?.focus({ preventScroll: true });
+  }, [room?.run, room?.round, room?.status]);
+  useEffect(() => {
+    if (hinted) hintText.current?.focus({ preventScroll: true });
+  }, [hinted]);
+  useEffect(() => {
+    if (submitted && room?.status === "active")
+      contributionHeading.current?.focus({ preventScroll: true });
+  }, [submitted]);
+  useEffect(() => {
+    if (room?.reviewed.includes(identity))
+      reviewStatus.current?.focus({ preventScroll: true });
+  }, [room?.reviewed.includes(identity)]);
   async function copyInvite() {
     if (!room) return;
     const url = new URL(location.href);
@@ -203,7 +228,7 @@ export function RaidHall({
         </div>
       </div>
       {!room && status && (
-        <p role="status" className="raid-note">
+        <p ref={reviewStatus} tabIndex={-1} role="status" className="raid-note">
           {status}
         </p>
       )}
@@ -243,7 +268,10 @@ export function RaidHall({
               <input
                 maxLength={20}
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  customName.current = true;
+                  setName(e.target.value);
+                }}
                 placeholder="Choose a nickname"
                 autoComplete="off"
                 disabled={connecting}
@@ -335,6 +363,7 @@ export function RaidHall({
               <label className="raid-label">
                 Have an invite? Enter the 8-character room code
                 <input
+                  aria-describedby="raid-code-help"
                   value={code}
                   maxLength={8}
                   onChange={(e) =>
@@ -357,6 +386,11 @@ export function RaidHall({
               >
                 Join room <ArrowRight size={16} />
               </button>
+              <p id="raid-code-help" className="raid-note">
+                {code && !/^[A-HJ-NP-Z2-9]{8}$/.test(code)
+                  ? "Enter all eight characters. Room codes do not use I, O, 0, or 1."
+                  : "Ask the host to share their eight-character code."}
+              </p>
             </form>
           </section>
           <details className="panel raid-rules">
@@ -422,7 +456,12 @@ export function RaidHall({
             </div>
           </section>
           {copied && (
-            <p role="status" className="raid-note">
+            <p
+              ref={reviewStatus}
+              tabIndex={-1}
+              role="status"
+              className="raid-note"
+            >
               {copied}
             </p>
           )}
@@ -508,6 +547,10 @@ export function RaidHall({
                 Defeat the Warden in six rounds. Boss health scales to the
                 starting party size. No timer—talk through your strategy
                 together.
+              </p>
+              <p className="raid-note">
+                Plan to strike most rounds. Ward and Mend keep you alive, but
+                the party must keep dealing damage to beat the six-round limit.
               </p>
               <div className="button-row">
                 <button
@@ -605,7 +648,7 @@ export function RaidHall({
                       {room.players.length} LOCKED IN
                     </span>
                   </div>
-                  <h2>
+                  <h2 ref={contributionHeading} tabIndex={-1}>
                     {submitted
                       ? "Your contribution is locked in."
                       : "Choose your contribution."}
@@ -650,7 +693,9 @@ export function RaidHall({
                       </button>
                     ))}
                   </div>
-                  <h3>{question.prompt}</h3>
+                  <h3 ref={questionHeading} tabIndex={-1}>
+                    {question.prompt}
+                  </h3>
                   <div className="raid-options">
                     {question.options.map((option, i) => (
                       <button
@@ -670,7 +715,12 @@ export function RaidHall({
                   </div>
                   <div className="raid-pet-hint">
                     <PetPortrait pet={me.pet} />
-                    <div>
+                    <div
+                      ref={hintText}
+                      tabIndex={-1}
+                      role="status"
+                      aria-live="polite"
+                    >
                       <strong>{pets[me.pet].name}</strong>
                       {hinted ? (
                         <p>
@@ -737,7 +787,7 @@ export function RaidHall({
                   <div className="eyebrow">
                     {ended ? "EXPEDITION DEBRIEF" : "ROUND DEBRIEF"}
                   </div>
-                  <h2>
+                  <h2 ref={debriefHeading} tabIndex={-1}>
                     {ended
                       ? room.status === "victory"
                         ? "Different paths. One victory."
@@ -794,10 +844,37 @@ export function RaidHall({
                       </div>
                     </div>
                   </div>
+                  <p
+                    ref={reviewStatus}
+                    tabIndex={-1}
+                    role="status"
+                    className="raid-note"
+                  >
+                    {
+                      room.players.filter((p) => room.reviewed.includes(p.id))
+                        .length
+                    }
+                    /{room.players.length} Hunters have reviewed this round.
+                  </p>
+                  <button
+                    className="secondary"
+                    disabled={
+                      disconnected || busy || room.reviewed.includes(identity)
+                    }
+                    onClick={() => send({ type: "acknowledge" })}
+                  >
+                    {room.reviewed.includes(identity)
+                      ? "Review complete"
+                      : "I’ve reviewed the results"}
+                  </button>
                   {host ? (
                     <button
                       className="primary"
-                      disabled={disconnected || busy}
+                      disabled={
+                        disconnected ||
+                        busy ||
+                        !room.players.every((p) => room.reviewed.includes(p.id))
+                      }
                       onClick={() => send({ type: ended ? "rematch" : "next" })}
                     >
                       {ended ? "Return party to lobby" : "Next round"}{" "}
@@ -807,7 +884,7 @@ export function RaidHall({
                     <p className="raid-note">
                       {disconnected
                         ? "The host disconnected. Leave this room to create a new expedition."
-                        : "Waiting for the host to continue."}
+                        : "Review the explanation and confirm when you are ready. The host continues after everyone reviews."}
                     </p>
                   )}
                 </section>

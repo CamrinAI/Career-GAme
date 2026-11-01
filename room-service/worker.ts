@@ -93,6 +93,8 @@ export default {
         return response({ error: "Request too large" }, 413);
       try {
         body = JSON.parse(raw);
+        if (!body || typeof body !== "object" || Array.isArray(body))
+          return response({ error: "Request must be a JSON object" }, 400);
       } catch {
         return response({ error: "Invalid request" }, 400);
       }
@@ -169,11 +171,9 @@ export default {
           );
         const data: RecordData = JSON.parse(row.data);
         const before = JSON.stringify(data);
-        if (data.closed || now - (data.seen[data.room.host] || 0) > 120000)
-          return response(
-            { error: "The host left or disconnected. Start a new room." },
-            410,
-          );
+        // Normalize existing v1 rooms without changing their schema migration.
+        data.room.run ??= 1;
+        data.room.reviewed ??= [];
         const actor = Object.keys(data.tokens).find(
           (id) => data.tokens[id] === tokenHash,
         );
@@ -182,6 +182,16 @@ export default {
             { error: "Your room session is invalid. Rejoin from the lobby." },
             401,
           );
+        const closed =
+          data.closed || now - (data.seen[data.room.host] || 0) > 120000;
+        if (closed) {
+          if (actor && (!action || action === "heartbeat"))
+            return response({ room: data.room, identity: actor, closed: true });
+          return response(
+            { error: "The host left or disconnected. Start a new room." },
+            410,
+          );
+        }
         for (const p of data.room.players)
           if (
             p.id !== data.room.host &&
@@ -224,6 +234,20 @@ export default {
             return response({ error: "You are no longer in this room." }, 410);
           if (action === "heartbeat") data.seen[actor] = now;
           if (action === "command") {
+            if (
+              !body.command ||
+              typeof body.command !== "object" ||
+              Array.isArray(body.command)
+            )
+              return response({ error: "Invalid room command" }, 400);
+            if (body.run !== data.room.run || body.round !== data.room.round)
+              return response(
+                {
+                  error:
+                    "The raid has moved on. Wait for room sync and try again.",
+                },
+                409,
+              );
             data.seen[actor] = now;
             data.room = updateRaid(
               data.room,
