@@ -22,100 +22,9 @@ import {
   type Pet,
 } from "./raid";
 import { useRaidRoom } from "./useRaidRoom";
-import { Warden, Scenery } from "./Scenery";
+import { Warden, Scenery, Hunter, PixelPet } from "./Scenery";
 export function PetPortrait({ pet }: { pet: Pet }) {
-  return (
-    <svg
-      className={"pet-portrait pet-" + pet}
-      viewBox="0 0 100 100"
-      role="img"
-      aria-label={pets[pet].name}
-    >
-      <circle cx="50" cy="50" r="43" fill="currentColor" opacity=".08" />
-      {pet === "owl" ? (
-        <>
-          <path
-            d="M25 30 29 16 45 28 55 28 72 16 75 33C85 74 65 86 50 86S15 74 25 30Z"
-            fill="currentColor"
-            opacity=".3"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <circle
-            cx="37"
-            cy="47"
-            r="14"
-            fill="#101529"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <circle
-            cx="63"
-            cy="47"
-            r="14"
-            fill="#101529"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <circle cx="37" cy="47" r="5" fill="currentColor" />
-          <circle cx="63" cy="47" r="5" fill="currentColor" />
-          <path
-            d="m46 60 4 8 4-8M36 74l5 4M59 78l5-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-          />
-        </>
-      ) : pet === "fox" ? (
-        <>
-          <path
-            d="M20 57 15 15 40 33 60 33 85 15 80 57 50 84Z"
-            fill="currentColor"
-            opacity=".3"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <path
-            d="m25 49 25 27 25-27-15 6-10 15-10-15Z"
-            fill="#e7e4ff"
-            opacity=".8"
-          />
-          <path
-            d="m29 45 10 4m22 0 10-4"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path d="m44 66 6 7 6-7" fill="#101529" />
-        </>
-      ) : (
-        <>
-          <path
-            d="m50 12 10 24 26 14-26 14-10 24-10-24-26-14 26-14Z"
-            fill="currentColor"
-            opacity=".25"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <ellipse
-            cx="50"
-            cy="51"
-            rx="20"
-            ry="23"
-            fill="currentColor"
-            opacity=".4"
-          />
-          <circle cx="43" cy="48" r="3" fill="#101529" />
-          <circle cx="57" cy="48" r="3" fill="#101529" />
-          <path
-            d="M44 60q6 7 12 0"
-            stroke="#101529"
-            strokeWidth="2"
-            fill="none"
-          />
-        </>
-      )}
-    </svg>
-  );
+  return <PixelPet pet={pet} name={pets[pet].name} />;
 }
 export function RaidHall({
   defaultName,
@@ -617,8 +526,25 @@ export function RaidHall({
                       max={room.maxBoss}
                     />
                   </div>
-                  <div className="raid-warden" aria-hidden="true">
-                    <Warden />
+                  <div
+                    key={`${room.run}-${room.round}-${room.status}`}
+                    className={`pixel-raid-stage ${room.status === "review" ? "raid-resolved" : ""} ${ended ? room.status : ""}`}
+                  >
+                    <div className="pixel-raid-party">
+                      {room.players.map((player) => (
+                        <div
+                          className={`pixel-raider ${room.results.find((result) => result.id === player.id)?.correct ? "contributed" : ""}`}
+                          key={player.id}
+                        >
+                          <Hunter career={player.career} />
+                          <PetPortrait pet={player.pet} />
+                          <span>{player.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="raid-warden">
+                      <Warden />
+                    </div>
                   </div>
                   <div className="raid-hp team">
                     <span>

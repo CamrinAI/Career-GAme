@@ -77,6 +77,7 @@ import {
   type PerkId,
 } from "./progression";
 import "./styles.css";
+import "./pixel.css";
 type Page =
   | "raid"
   | "pathfinder"
@@ -416,7 +417,7 @@ function App() {
                 <div className="hero-shade" />
                 <div className="hero-content">
                   <div className="pill">
-                    <Sparkles size={12} /> YOUR ASCENSION BEGINS HERE
+                    <Sparkles size={12} /> PIXEL CHRONICLES · CHAPTER 01
                   </div>
                   <h2>
                     Ordinary today.
@@ -461,6 +462,35 @@ function App() {
                   </div>
                   <span className="rank-mini">C</span>
                 </div>
+              </section>
+              <section
+                className="pixel-destinations"
+                aria-label="Choose your next adventure"
+              >
+                <button onClick={() => go("academy")}>
+                  <span className="pixel-stop">01</span>
+                  <div>
+                    <small>LEARN & PREPARE</small>
+                    <strong>Hunter Academy</strong>
+                  </div>
+                  <BookOpen size={20} />
+                </button>
+                <button onClick={() => go("dungeon")}>
+                  <span className="pixel-stop">02</span>
+                  <div>
+                    <small>SOLO BOSS ENCOUNTER</small>
+                    <strong>Citadel of Identity</strong>
+                  </div>
+                  <Swords size={20} />
+                </button>
+                <button onClick={() => go("raid")}>
+                  <span className="pixel-stop">03</span>
+                  <div>
+                    <small>2–4 PLAYER CO-OP</small>
+                    <strong>The Fracture</strong>
+                  </div>
+                  <Users size={20} />
+                </button>
               </section>
               <section className="stats-grid" aria-label="Hunter statistics">
                 <div className="stat-card">
@@ -855,7 +885,7 @@ function App() {
           )}
           <footer>
             <span>
-              <Hexagon size={13} /> QUEST RANK <b>·</b> RIFT RAIDS BETA v1.1.1
+              <Hexagon size={13} /> QUEST RANK <b>·</b> PIXEL CHRONICLES v1.2.0
             </span>
             <p>An original adventure. Real skills. Limitless potential.</p>
             <span className="footer-disclaimer">
@@ -1283,6 +1313,7 @@ function Dungeon({
   const [answer, setAnswer] = useState<number | null>(null);
   const [effect, setEffect] = useState(0);
   const [cue, setCue] = useState<BattleCue | null>(null);
+  const arenaRef = useRef<HTMLElement>(null);
   function turn(a: Action, correct = true) {
     const next = resolveTurn(battle, a, correct);
     setBattle(next);
@@ -1389,7 +1420,12 @@ function Dungeon({
         <span>{perkFor(battlePerk).description}</span>
       </div>
       <div className="battle-layout">
-        <section className="arena panel">
+        <section
+          ref={arenaRef}
+          tabIndex={-1}
+          aria-label="Battle arena"
+          className={`arena panel pixel-battle ${battle.phase === 2 ? "enraged" : ""} ${battle.status}`}
+        >
           <Scenery arena />
           <div className="arena-vignette" />
           <div className="arena-top">
@@ -1411,7 +1447,7 @@ function Dungeon({
           </div>
           <div
             key={effect}
-            className={"combat-actors " + (effect ? "hit" : "")}
+            className={`combat-actors ${cue ? (cue.action === "defend" ? "is-guarding" : cue.correct ? "is-attacking" : "is-countered") : ""}`}
           >
             <div className="hunter-actor">
               <Hunter />
@@ -1423,6 +1459,25 @@ function Dungeon({
             </div>
           </div>
           <div className="arena-floor" />
+          <div
+            className="pixel-turn-order"
+            aria-label={
+              battle.status === "active"
+                ? "Turn sequence: hunter command, then Warden response"
+                : `Encounter ${battle.status}`
+            }
+          >
+            <span>{battle.status === "active" ? "TURN ORDER" : "RESULT"}</span>
+            {battle.status === "active" ? (
+              <>
+                <b>01 · YOU</b>
+                <span>→</span>
+                <b>02 · WARDEN</b>
+              </>
+            ) : (
+              <b>{battle.status.toUpperCase()}</b>
+            )}
+          </div>
           <BattleEffects cue={cue} />
           <div className="hunter-hud">
             <div className="hud-avatar">
@@ -1491,6 +1546,24 @@ function Dungeon({
       <div className="battle-log panel" role="status" aria-live="polite">
         <Activity size={19} />
         <span>{battle.log}</span>
+        {cue && (
+          <button
+            className="text-button replay-animation"
+            onClick={() => {
+              setEffect((n) => n + 1);
+              setCue((previous) =>
+                previous ? { ...previous, serial: previous.serial + 1 } : null,
+              );
+              arenaRef.current?.focus({ preventScroll: true });
+              arenaRef.current?.scrollIntoView({
+                block: "center",
+                behavior: "instant",
+              });
+            }}
+          >
+            Replay animation
+          </button>
+        )}
       </div>
       {action ? (
         <section className="panel combat-question">

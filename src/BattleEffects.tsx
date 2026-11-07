@@ -1,4 +1,5 @@
 import { Shield, Sparkles, Swords, Zap } from "lucide-react";
+import { Hunter } from "./Scenery";
 import type { Action } from "./engine";
 export type BattleCue = {
   serial: number;
@@ -26,6 +27,21 @@ export function BattleEffects({ cue }: { cue: BattleCue | null }) {
       className={`battle-effects ${kind}`}
       aria-hidden="true"
     >
+      {kind === "ultimate" && (
+        <div className="pixel-cut-in">
+          <Hunter />
+          <div>
+            <small>ULTIMATE TECHNIQUE</small>
+            <strong>Identity rupture</strong>
+          </div>
+        </div>
+      )}
+      <div className="pixel-impact">
+        <i />
+        <i />
+        <i />
+        <i />
+      </div>
       <div className="energy-trail" />
       <div className="skill-flash">
         <Icon size={35} />
@@ -44,7 +60,9 @@ export function BattleEffects({ cue }: { cue: BattleCue | null }) {
       {cue.damage > 0 && (
         <span className="damage-pop boss-damage">−{cue.damage}</span>
       )}
-      <span className="damage-pop hunter-damage">−{cue.hpLoss}</span>
+      {cue.hpLoss > 0 && (
+        <span className="damage-pop hunter-damage">−{cue.hpLoss}</span>
+      )}
       {cue.phaseShift && (
         <div className="phase-warning">PHASE II · THE WARDEN AWAKENS</div>
       )}

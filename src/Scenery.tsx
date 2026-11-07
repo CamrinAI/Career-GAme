@@ -1,301 +1,353 @@
-export function Scenery({ arena = false }: { arena?: boolean }) {
+import type { Career, Pet } from "./raid";
+
+// Original low-resolution sprites. One character is one pixel; SVG keeps the
+// integer grid sharp at every display size without external asset requests.
+const hunter = [
+  "........hhhhh...........",
+  ".......hHHHHHh..........",
+  "......hHHHHHHHh.........",
+  "......hHssssHh..........",
+  "......hssesssh..........",
+  ".......sssss............",
+  ".....ccaaaaac...........",
+  "....cCCaAAaAcc..........",
+  "...cCCcaAAAacc..........",
+  "...cCcgaAAAgacc.........",
+  "...cCgggaAgggcc....w....",
+  "....cgggAAAggc....wWw...",
+  "....c.ggAAAgg....wWWw...",
+  "...cc..aaaaa.....wWWw...",
+  "...cc..bBBbb.....wWWw...",
+  "...cc..bBBbb.....wWWw...",
+  "...cc..bB.bb......wW....",
+  "...cc..bB.bb.....gggg...",
+  "...cc..bB.bb......gg....",
+  "....c..bB.bb............",
+  ".......bb.bbb...........",
+  "......ggg.gggg..........",
+  "......ggg.gggg..........",
+  "........................",
+];
+const warden = [
+  "......v............v......",
+  "......vv..........vv......",
+  "......vVv........vVv......",
+  ".......vVvVVVVVVvVv.......",
+  ".......vVVVVVVVVVVv.......",
+  ".......vVddddddVVVv.......",
+  ".......vVdEddEdVVVv.......",
+  "........vddddddVVv........",
+  ".........vvVVVVvv.........",
+  "....vvvVVVVVVVVVVVVvvv....",
+  "...vVVVLLVVVVVVVVLLVVVv...",
+  "..vVVVLLLVVppVVVLLLVVVVv..",
+  "..vVvvvvVVppPpVVVvvvvVVv..",
+  "..vVVv.vVVpPPpVVv.vVVVVv..",
+  "..vVVv.vVVVppVVVv.vVVVVv..",
+  "..vVVv.vVVVppVVVv.vVLLVv..",
+  "..vVVv.vVVVVVVVVv.vVLLVv..",
+  "..vVVv..vVVVVVVv..vVLLVv..",
+  "..vddv..vLLLLLLv..vVVVVv..",
+  "..vddv..vvvvvvvv..vVVVVv..",
+  "...vv...vVVvvVVv...vvvv...",
+  "........vVVvvVVv..........",
+  ".......vVVv..vVVv.........",
+  ".......vVVv..vVVv.........",
+  ".......vVVv..vVVv.........",
+  "......vVVVv..vVVVv........",
+  ".....vLLLLv..vLLLLv.......",
+  ".....vvvvvv..vvvvvv.......",
+  "..........................",
+];
+const petSprites: Record<Pet, string[]> = {
+  owl: [
+    "..p.........p..",
+    "..pp.......pp..",
+    "..pPpppppppPp..",
+    ".pPPPPPPPPPPPp.",
+    ".pPwwwPPPwwwPp.",
+    ".pPwDwPPPwDwPp.",
+    ".pPwwwPPPwwwPp.",
+    ".pPPPPPqPPPPPp.",
+    "..pPPPPqPPPPp..",
+    "..pPPpPPPpPPp..",
+    "...pPPpppPPp...",
+    "....ppppppp....",
+    ".....q...q.....",
+  ],
+  fox: [
+    "..p.........p..",
+    "..pp.......pp..",
+    "..pwp.....pwp..",
+    "..pPpppppppPp..",
+    "..pPPPPPPPPPp..",
+    ".pPPDPPPPPDPPp.",
+    ".pPwwPPPPPwwPp.",
+    "..pwwwwDwwwwp..",
+    "...pwwwwwwwp...",
+    "....pPPPPPp..pp",
+    "....pPPPPp..pwp",
+    "....pPPPPpppwwp",
+    ".....pppppppp..",
+  ],
+  sprite: [
+    ".......p.......",
+    "......pwp......",
+    "......pwp......",
+    "...pppPPPppp...",
+    "..pPPwwwwwPPp..",
+    ".pPPwDwDwDwPPp.",
+    "pwwPwDwwwDwPwwp",
+    ".pPPwwwwwwwPPp.",
+    "..pPPwwwwwPPp..",
+    "...pppPPPppp...",
+    "......pwp......",
+    "......pwp......",
+    ".......p.......",
+  ],
+};
+const accents: Record<Career, string> = {
+  cloud: "#74e4e8",
+  nurse: "#90e6b1",
+  software: "#ffc878",
+  ai: "#bd9dff",
+};
+function Pixels({
+  rows,
+  palette,
+}: {
+  rows: string[];
+  palette: Record<string, string>;
+}) {
+  return (
+    <>
+      {rows.flatMap((row, y) =>
+        [...row].map((color, x) =>
+          color === "." ? null : (
+            <rect
+              key={`${x}-${y}`}
+              x={x}
+              y={y}
+              width="1"
+              height="1"
+              fill={palette[color] || "#121326"}
+            />
+          ),
+        ),
+      )}
+    </>
+  );
+}
+export function Hunter({ career = "cloud" }: { career?: Career }) {
   return (
     <svg
-      className={`scenery ${arena ? "arena-scenery" : ""}`}
-      viewBox="0 0 1100 560"
+      className={`hunter-illustration pixel-sprite career-${career}`}
+      viewBox="0 0 24 26"
       role="img"
-      aria-label="Original illustration of a floating citadel above a violet mountain range"
+      aria-label={`Pixel ${career} hunter with an energy blade`}
+      shapeRendering="crispEdges"
     >
-      <defs>
-        <linearGradient id="sky" x2="0" y2="1">
-          <stop stopColor="#11172f" />
-          <stop offset=".6" stopColor="#292453" />
-          <stop offset="1" stopColor="#716292" />
-        </linearGradient>
-        <linearGradient id="stone" x2=".6" y2="1">
-          <stop stopColor="#35375c" />
-          <stop offset="1" stopColor="#0b1125" />
-        </linearGradient>
-        <linearGradient id="spire" x2="1" y2=".6">
-          <stop stopColor="#66658c" />
-          <stop offset=".45" stopColor="#34354f" />
-          <stop offset="1" stopColor="#121a30" />
-        </linearGradient>
-        <linearGradient id="portal" x2="0" y2="1">
-          <stop stopColor="#c3b5ff" />
-          <stop offset=".5" stopColor="#8778ef" />
-          <stop offset="1" stopColor="#363778" />
-        </linearGradient>
-        <radialGradient id="halo">
-          <stop stopColor="#9f8afc" stopOpacity=".36" />
-          <stop offset="1" stopColor="#7b60ee" stopOpacity="0" />
-        </radialGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="4" />
-        </filter>
-      </defs>
-      <path fill="url(#sky)" d="M0 0h1100v560H0z" />
-      <ellipse cx="782" cy="245" rx="310" ry="260" fill="url(#halo)" />
-      {Array.from({ length: 48 }, (_, i) => (
-        <circle
-          key={i}
-          cx={(i * 137 + 19) % 1100}
-          cy={(i * 71 + 13) % 340}
-          r={i % 6 === 0 ? 1.5 : 0.7}
-          fill="#dfdcff"
-          opacity={0.2 + (i % 4) * 0.15}
-        />
-      ))}
-      <circle
-        cx="850"
-        cy="118"
-        r="61"
-        fill="none"
-        stroke="#9692d4"
-        strokeWidth=".8"
-        opacity=".3"
-      />
-      <circle cx="850" cy="118" r="53" fill="#b7afe3" opacity=".05" />
-      <path
-        fill="#343254"
-        d="M0 371l100-83 69 56 98-144 80 144 105-66 88 89 127-130 83 85 92-108 94 112 65-70v304H0z"
-      />
-      <path
-        fill="#22263f"
-        d="M0 415l136-55 81 56 91-89 96 111 104-82 89 64 97-71 126 103 106-92 74 66v134H0z"
-      />
-      <path
-        fill="#141c31"
-        d="M0 483l103-52 83 54 140-68 117 81 135-47 92 64 170-89 127 66 133-65v133H0z"
-      />
-      <g className="floating-citadel">
-        <ellipse
-          cx="776"
-          cy="414"
-          rx="209"
-          ry="24"
-          fill="#b09cf6"
-          opacity=".12"
-        />
-        <path
-          d="M581 354l64 62 39 15 38 78 34-47 40 45 36-77 68-14 62-68-145-36z"
-          fill="url(#stone)"
-          stroke="#626087"
-          strokeWidth="1"
-        />
-        <path
-          d="M672 395l31 29 19 85 15-94M787 399l9 108 23-100M855 394l-23 36"
-          fill="none"
-          stroke="#656085"
-          opacity=".5"
-        />
-        <path
-          d="M568 351l78-36 180-18 145 52-85 52-205 2z"
-          fill="#45435f"
-          stroke="#787197"
-        />
-        <path d="M600 351l86-25 139-11 108 36-62 30H685z" fill="#22283f" />
-        <path
-          d="M640 349v-84l20-14 21 14v84M850 345v-93l21-15 19 16v92"
-          fill="url(#spire)"
-          stroke="#77708b"
-        />
-        <path
-          d="M631 268l29-68 31 68zM842 254l29-74 27 74z"
-          fill="#252c48"
-          stroke="#77708b"
-        />
-        <path
-          d="M684 353V222l28-20 29 20v131M799 353V208l26-19 26 19v144"
-          fill="url(#spire)"
-          stroke="#77708b"
-        />
-        <path
-          d="M679 225l33-83 34 83zM794 211l31-79 31 79z"
-          fill="#252c48"
-          stroke="#77708b"
-        />
-        <path
-          d="M724 355V156l41-30 42 30v199"
-          fill="url(#spire)"
-          stroke="#8a819c"
-        />
-        <path d="M714 159l51-116 52 116z" fill="#292f4e" stroke="#807b9a" />
-        <path d="M765 43v-23" stroke="#c1b6e6" />
-        <path
-          d="M723 166l42-13 42 13M730 181l35-12 34 12"
-          fill="none"
-          stroke="#8c81a7"
-        />
-        <path
-          d="M702 356v-62q63-99 126 0v62z"
-          fill="#171e35"
-          stroke="#9583b9"
-          strokeWidth="3"
-        />
-        <path d="M727 356v-58q38-67 76 0v58" fill="url(#portal)" />
-        <path
-          d="M727 356v-58q38-67 76 0v58"
-          fill="none"
-          stroke="#b5a0ff"
-          strokeWidth="6"
-          filter="url(#glow)"
-        />
-        <path
-          d="M765 270v86M744 283v73M785 283v73"
-          stroke="#c5b5ff"
-          opacity=".3"
-        />
-        {[653, 706, 757, 820, 870].map((x, i) => (
-          <path
-            key={x}
-            d={`M${x} ${i === 2 ? 193 : 283}v20h7v-20z`}
-            fill="#c3a3f9"
-            opacity=".8"
-          />
-        ))}
-        <path d="M738 357l-35 38h125l-35-38" fill="#676080" stroke="#9b87b2" />
-        <path d="M729 368h73M720 378h91M712 387h108" stroke="#252a43" />
-        <ellipse
-          cx="769"
-          cy="400"
-          rx="207"
-          ry="41"
-          fill="none"
-          stroke="#8b7de3"
-          strokeDasharray="110 20 30 20"
-          opacity=".4"
+      <path d="M4 24h17v1H4z" fill="#080e24" opacity=".6" />
+      <g className="sprite-idle">
+        <Pixels
+          rows={hunter}
+          palette={{
+            h: "#17213c",
+            H: "#dfecff",
+            s: "#ecba9c",
+            e: "#20334b",
+            c: "#29284f",
+            C: "#645a9c",
+            a: "#304b65",
+            A: accents[career],
+            g: "#b4c8dc",
+            b: "#16223b",
+            B: "#48627f",
+            w: "#479aaf",
+            W: "#c7fff3",
+          }}
         />
       </g>
-      <path
-        d="M0 556Q430 470 723 557"
-        stroke="#a295d5"
-        strokeWidth="2"
-        fill="none"
-        opacity=".15"
-      />
-      <path
-        fill="#0b1424"
-        d="M0 491l91-18 99 41 89-14 84 60H0zM949 560l51-118 49 34 51-50v134z"
-      />
     </svg>
   );
 }
 export function Warden() {
   return (
     <svg
-      className="warden"
-      viewBox="0 0 220 280"
+      className="warden pixel-sprite"
+      viewBox="0 0 26 31"
       role="img"
-      aria-label="IAM Warden in original violet armor"
+      aria-label="Pixel Warden in violet crystal armor"
+      shapeRendering="crispEdges"
     >
-      <defs>
-        <linearGradient id="armor">
-          <stop stopColor="#656083" />
-          <stop offset="1" stopColor="#202841" />
-        </linearGradient>
-      </defs>
-      <ellipse cx="112" cy="258" rx="80" ry="14" fill="#a084f1" opacity=".25" />
-      <path
-        d="M88 179l-14 69 27 8 15-65 9 65 29-8-13-72"
-        fill="#262e49"
-        stroke="#9485b7"
-      />
-      <path
-        d="M57 91L25 109l15 76 28-12 11-61M161 90l36 19-13 78-27-15-10-60"
-        fill="url(#armor)"
-        stroke="#a28abf"
-      />
-      <path
-        d="M57 94l49-22 54 21-15 93-62 6z"
-        fill="url(#armor)"
-        stroke="#ab91cf"
-        strokeWidth="2"
-      />
-      <path
-        d="M95 49l-7-30 22 15 24-16-7 32 11 29-30 17-30-18z"
-        fill="#343c5b"
-        stroke="#ab91cf"
-      />
-      <path d="M92 58h31l-7 9h-16z" fill="#9bf4ff" />
-      <path d="M112 111l17 25-17 26-18-26z" fill="#c7b0ff" />
-      <path d="M22 133l13 94M17 154h30" stroke="#c7b0ff" strokeWidth="6" />
-      <path
-        d="M164 121l42 8-4 65-32 14-17-27z"
-        fill="#313650"
-        stroke="#bb9ee3"
-        strokeWidth="3"
-      />
-      <path d="M179 142l12 15-10 22-10-19z" fill="#a994ee" />
+      <path d="M3 29h20v1H3z" fill="#090d23" opacity=".65" />
+      <g className="sprite-idle">
+        <Pixels
+          rows={warden}
+          palette={{
+            v: "#1e1c37",
+            V: "#60538e",
+            L: "#b49bcc",
+            d: "#30334d",
+            E: "#9ffff3",
+            p: "#a16bdf",
+            P: "#f0cfff",
+          }}
+        />
+      </g>
     </svg>
   );
 }
-
-export function Hunter() {
+export function PixelPet({ pet, name }: { pet: Pet; name: string }) {
   return (
     <svg
-      className="hunter-illustration"
-      viewBox="0 0 160 220"
+      className={`pet-portrait pixel-sprite pet-${pet}`}
+      viewBox="0 0 15 15"
       role="img"
-      aria-label="Original Hunter in cyan armor with an energy blade"
+      aria-label={name}
+      shapeRendering="crispEdges"
     >
-      <defs>
-        <linearGradient id="hunterArmor">
-          <stop stopColor="#7395ba" />
-          <stop offset="1" stopColor="#293d60" />
-        </linearGradient>
-        <linearGradient id="hunterCape">
-          <stop stopColor="#5361a0" />
-          <stop offset="1" stopColor="#1a2548" />
-        </linearGradient>
-      </defs>
-      <ellipse cx="77" cy="205" rx="52" ry="10" fill="#8dbfea" opacity=".17" />
+      <g className="pet-bob">
+        <Pixels
+          rows={petSprites[pet]}
+          palette={{
+            p: "#26243f",
+            P:
+              pet === "fox"
+                ? "#e0a263"
+                : pet === "sprite"
+                  ? "#7fe3c4"
+                  : "#b29ce4",
+            w: "#f9edcf",
+            D: "#263751",
+            q: "#efbb70",
+          }}
+        />
+      </g>
+    </svg>
+  );
+}
+export function Scenery({ arena = false }: { arena?: boolean }) {
+  return (
+    <svg
+      className={`scenery pixel-landscape ${arena ? "arena-scenery" : ""}`}
+      viewBox="0 0 320 168"
+      preserveAspectRatio="xMidYMid slice"
+      role="img"
+      aria-label={
+        arena
+          ? "Pixel moonlit citadel battleground"
+          : "Pixel floating citadel above moonlit mountains and a glowing river"
+      }
+      shapeRendering="crispEdges"
+    >
+      <path fill="#111b35" d="M0 0h320v168H0z" />
+      <path fill="#1c2848" d="M0 45h320v123H0z" />
+      <path fill="#303853" d="M0 80h320v88H0z" />
+      {Array.from({ length: 40 }, (_, i) => (
+        <rect
+          className={i % 5 === 0 ? "pixel-star" : ""}
+          key={i}
+          x={(i * 43 + 7) % 320}
+          y={(i * 17 + 4) % 75}
+          width={i % 5 === 0 ? 2 : 1}
+          height="1"
+          fill={i % 3 ? "#849cbb" : "#e3d8b3"}
+        />
+      ))}
       <path
-        d="M53 66l46-1 32 128-54-19-49 20z"
-        fill="url(#hunterCape)"
-        stroke="#6678ae"
+        fill="#e5d9b0"
+        d="M257 12h14v3h5v5h3v14h-3v5h-5v3h-14v-3h-5v-5h-3V20h3v-5h5z"
+      />
+      <path fill="#bcb9a1" d="M271 15h5v5h3v14h-3v5h-5v3h-7v-3h6v-5h3V21h-2z" />
+      <g fill="#4a506b">
+        <path d="M0 94h15v-8h12v-9h9v-8h8v-8h9v14h9v9h13v12h14v72H0zM90 100h12V88h12V77h9V65h8v-9h9v14h10v13h13v17h16v68H90zM230 105h12V88h9V78h9V62h7v-9h10v19h10v15h15v11h18v70h-90z" />
+      </g>
+      <path
+        fill="#303e5b"
+        d="M0 114h24v-9h19v-9h15v10h15v12h16v-9h19v-8h12v-7h13v12h17v12h19v-10h20V96h18v12h19v10h16v-12h21v-9h15v14h18v12h24v45H0z"
       />
       <path
-        d="M59 130l-9 66 24 3 10-61 8 61 22-6-16-64"
-        fill="#2b3d5e"
-        stroke="#7d9cc0"
+        fill="#1b3048"
+        d="M0 130h32v-8h28v10h27v-7h30v9h39v-10h30v9h30v-10h32v10h30v-9h42v44H0z"
       />
       <path
-        d="M49 72l32-14 29 15-11 67-39 2z"
-        fill="url(#hunterArmor)"
-        stroke="#8faed3"
+        fill="#3a6676"
+        d="M135 124h36v5h-15v5h-21v6h40v6h30v7h-18v5h-80v-7h30v-7h-30v-7h15v-6h13z"
       />
-      <path
-        d="M66 31l19-9 21 14-5 30-17 10-19-12z"
-        fill="#334d70"
-        stroke="#9bbce3"
-      />
-      <path d="M67 39l17-9 20 9-4 5-16-6-17 6z" fill="#243957" />
-      <path d="M72 49h24l-5 7H77z" fill="#a9f4ef" />
-      <path
-        d="M45 76l-15 8 7 52 18-7 7-42M108 76l14 10-6 44-17-6"
-        fill="url(#hunterArmor)"
-        stroke="#92aed2"
-      />
-      <path d="M80 87l13 18-12 18-12-18z" fill="#a5ddd9" />
-      <path
-        d="M27 116l10 54M22 133h25"
-        fill="none"
-        stroke="#85e7e4"
-        strokeWidth="5"
-      />
-      <path
-        d="M22 76l27-8 12 21-5 46-23 8-14-26z"
-        fill="#354e70"
-        stroke="#a4c9e8"
-        strokeWidth="2"
-      />
-      <path
-        d="M31 89l12-4 9 13-5 23-11 4-10-17z"
-        fill="none"
-        stroke="#92dad7"
-        strokeWidth="2"
-      />
+      <g className="river-shimmer" fill="#80b5b0">
+        <path d="M138 129h19v1h-19zM129 138h25v1h-25zM143 147h32v1h-32zM124 155h45v1h-45z" />
+      </g>
+      <g className="floating-citadel">
+        <path
+          fill="#1b223b"
+          d="M185 111h92v7h-9v9h-13v10h-12v10h-11v-8h-13v-12h-18v-8h-16z"
+        />
+        <path
+          fill="#43516c"
+          d="M180 105h102v7H180zM192 112h75v5h-75zM216 119h9v12h-9zM238 125h6v14h-6z"
+        />
+        <path fill="#627584" d="M185 101h92v5h-92z" />
+        {[198, 219, 244, 261].map((x, i) => (
+          <g key={x}>
+            <path fill="#394862" d={`M${x} ${i % 2 ? 61 : 73}h12v39h-12z`} />
+            <path fill="#77849b" d={`M${x} ${i % 2 ? 61 : 73}h3v39h-3z`} />
+            <path
+              fill="#433b69"
+              d={`M${x - 3} ${i % 2 ? 61 : 73}h18v-4h-3v-4h-3v-4h-6v4h-3v4h-3z`}
+            />
+            <rect
+              x={x + 5}
+              y={i % 2 ? 71 : 82}
+              width="3"
+              height="6"
+              fill="#ffdb9e"
+            />
+          </g>
+        ))}
+        <path fill="#52617e" d="M228 42h17v62h-17z" />
+        <path fill="#94a1b2" d="M228 42h3v62h-3z" />
+        <path
+          fill="#625485"
+          d="M224 42h25v-4h-4v-7h-4v-7h-4v-8h-2v8h-4v7h-3v7h-4z"
+        />
+        <path fill="#e5c1ff" d="M235 48h4v7h-4zM235 60h4v7h-4z" />
+        <path fill="#1e263e" d="M222 104V86h5v-5h18v5h5v18z" />
+        <path
+          className="portal-light"
+          fill="#b6a3ee"
+          d="M228 103V88h5v-3h7v3h4v15z"
+        />
+        <path fill="#8391a5" d="M226 104h20v3h-20zM222 107h28v3h-28z" />
+        <path className="pixel-banner" fill="#d7a46d" d="M239 17h12v6h-12z" />
+      </g>
+      {arena && (
+        <g>
+          <path fill="#293a4e" d="M0 130h320v38H0z" />
+          <path fill="#58707e" d="M0 131h320v2H0z" />
+          {Array.from({ length: 7 }, (_, y) =>
+            Array.from({ length: 17 }, (_, x) => (
+              <rect
+                key={`${x}-${y}`}
+                x={x * 21 - (y % 2) * 10}
+                y={135 + y * 6}
+                width="19"
+                height="4"
+                fill={(x + y) % 3 ? "#34495b" : "#3f5767"}
+              />
+            )),
+          )}
+        </g>
+      )}
+      {[5, 29, 70, 292, 312].map((x, i) => (
+        <g
+          key={x}
+          transform={`translate(${x} ${arena ? 109 : 132 - (i % 2) * 8})`}
+        >
+          <path d="M0 0h4v6h4v6h4v5H-8v-5h4V6h4z" fill="#132a37" />
+          <path d="M0 16h4v10H0z" fill="#162337" />
+        </g>
+      ))}
     </svg>
   );
 }
