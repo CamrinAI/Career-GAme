@@ -1,0 +1,594 @@
+/* Skybound: reference-inspired pixel adventure and desktop-window panels. */
+:root {
+  color: #282333;
+  background: #d6cce7;
+  --panel: #f3edf8;
+  --border: #393143;
+  --muted: #62546f;
+  --purple: #5343a4;
+  --cyan: #287b59;
+}
+body {
+  background: #d6cce7;
+  color: #282333;
+}
+p {
+  color: #62546f;
+}
+h1,
+h2,
+h3 {
+  color: #292233;
+  font-weight: 800;
+}
+h1 > span {
+  color: #326aab;
+}
+.sidebar {
+  background: #eee6f4;
+  border-right: 3px solid #302a3b;
+}
+.brand {
+  color: #292333;
+}
+.brand span {
+  color: #465ca2;
+}
+.brand small,
+.side-label,
+.tiny,
+.campaign-side small {
+  color: #62566f;
+}
+.brand-mark {
+  background: #f4cf54;
+  color: #262235;
+}
+.nav-item {
+  color: #51475e;
+}
+.nav-item svg {
+  color: #71617e;
+}
+.nav-item.active {
+  color: #292333;
+  background: #c9d9f5;
+  border: 2px solid #393143;
+  box-shadow: 2px 2px #393143;
+}
+.nav-item.active svg {
+  color: #325da2;
+}
+.nav-item.active:before {
+  background: #e0a740;
+  box-shadow: none;
+}
+.campaign-side {
+  background: #ded3ee;
+  border: 2px solid #51415c;
+}
+.campaign-side strong {
+  color: #342940;
+}
+.topbar,
+header {
+  background: #eee7f5;
+  border-color: #5e4f6a;
+  color: #45384f;
+}
+.panel,
+.stat-card,
+.quest-card {
+  color: #2c2537;
+  background: #f4eff8;
+  border: 2px solid #403548;
+  border-radius: 6px;
+  box-shadow: 4px 5px 0 #3d314f;
+}
+.panel:not(.arena):not(.raid-arena) :is(p, small, label),
+.stat-card p,
+.stat-card small,
+.quest-card p {
+  color: #62546f;
+}
+.panel:not(.arena):not(.raid-arena) :is(h2, h3, strong),
+.stat-card h3,
+.quest-card h3 {
+  color: #2c2537;
+}
+.eyebrow,
+.chapter-label span,
+.reader-meta,
+.hero-meta,
+.stat-card div > span {
+  color: #675776;
+}
+.chapter-label strong {
+  color: #39314a;
+}
+.primary {
+  background: #85d87c;
+  color: #193528;
+  border: 2px solid #2f2a39;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 3px #bdf3a3,
+    inset 0 -3px #4e9953,
+    3px 4px #2f2a39;
+  font-weight: 800;
+}
+.secondary {
+  color: #3e3151;
+  background: #ddd0ee;
+  border: 2px solid #54425e;
+  box-shadow: 2px 3px #54425e;
+}
+.text-button {
+  color: #3e569a;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #195aa3;
+}
+.nexus-raid-invite {
+  background: #eee6f4;
+  border-left: 6px solid #8562b2;
+}
+.nexus-raid-invite h2 {
+  font-size: 21px;
+}
+.hero {
+  height: 470px;
+  border: 3px solid #342a40;
+  border-radius: 10px;
+  background: #90b5ed;
+  box-shadow: 5px 6px #3d314f;
+}
+.skybound-scenery {
+  overflow: hidden;
+}
+.skybound-scenery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+  display: block;
+}
+.hero > .skybound-scenery {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+}
+.hero > .skybound-scenery img {
+  object-position: 65% 55%;
+}
+.hero-shade {
+  display: none;
+}
+.hero-content {
+  margin: 24px;
+  padding: 24px;
+  width: 360px;
+  max-width: calc(100% - 48px);
+  background: #f3ecf7f2;
+  border: 2px solid #352b41;
+  border-radius: 6px;
+  box-shadow: 4px 5px #352b41;
+}
+.hero-content:before {
+  content: "● ● ●";
+  display: block;
+  letter-spacing: 3px;
+  color: #8261aa;
+  font:
+    bold 12px ui-monospace,
+    monospace;
+  border-bottom: 2px solid #776584;
+  margin: -10px -10px 18px;
+  padding: 0 10px 10px;
+}
+.hero .pill {
+  background: #e2d4ee;
+  color: #53406c;
+  border: 1px solid #806c91;
+  font-size: 8px;
+}
+.hero h2 {
+  color: #292333;
+  font-size: 30px;
+  letter-spacing: -1.8px;
+  text-shadow: none;
+  margin-top: 17px;
+}
+.hero h2 em {
+  color: #345aa3;
+}
+.hero p {
+  color: #51445f;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.hero-actions {
+  gap: 13px;
+  flex-wrap: wrap;
+}
+.hero-meta {
+  display: none;
+}
+.hero-adventurer {
+  position: absolute;
+  z-index: 2;
+  bottom: 18px;
+  left: 52%;
+  display: flex;
+  align-items: end;
+  pointer-events: none;
+}
+.hero-adventurer > .hunter-illustration {
+  width: 125px;
+  height: 145px;
+  filter: drop-shadow(3px 3px #26202e55);
+}
+.hero-adventurer > .pet-portrait {
+  width: 45px;
+  height: 45px;
+  margin-left: -15px;
+}
+.location {
+  background: #f5e8bb;
+  color: #473b30;
+  border: 2px solid #463725;
+  border-radius: 4px;
+  bottom: 20px;
+  right: 20px;
+}
+.location small,
+.location strong {
+  color: #473b30;
+}
+.pixel-destinations {
+  gap: 16px;
+}
+.pixel-destinations button {
+  background: #e8dff1;
+  color: #342a40;
+  border: 2px solid #463b51;
+  border-radius: 5px;
+  box-shadow: 3px 4px #463b51;
+}
+.pixel-destinations button:hover {
+  background: #d6e6bc;
+}
+.pixel-destinations small {
+  color: #6b587b;
+}
+.pixel-destinations .pixel-stop {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #352a3f;
+  background: #a9dba0;
+  color: #234d34;
+  font-weight: 800;
+}
+.stat-card {
+  border-top: 7px solid #a18abe;
+}
+.stat-icon {
+  border: 2px solid #50415e;
+  border-radius: 7px;
+  background: #d8e5fc;
+}
+.meter {
+  background: #d5c8df;
+  border: 1px solid #62526d;
+  height: 10px;
+}
+.meter > span {
+  background: #72ca71;
+  box-shadow: inset 0 2px #b4f199;
+}
+.quest-card {
+  background: #eee6f5;
+}
+.quest-card h3 {
+  color: #3d3150;
+}
+.quest-card .text-button {
+  color: #3e569a;
+}
+input,
+select {
+  background: #fffafc;
+  color: #30243a;
+  border: 2px solid #8e7b9c;
+  border-radius: 4px;
+}
+.answer,
+.raid-answers button,
+.raid-moves button,
+.career-options button,
+.pet-options button {
+  background: #e7dcef;
+  color: #3a2e46;
+  border: 2px solid #7d668b;
+}
+.answer > span {
+  color: #5b4472;
+  background: #d1bee2;
+}
+.answer.correct,
+.feedback.success {
+  background: #d7edcf;
+  color: #224c30;
+  border-color: #4a7c50;
+}
+.answer.incorrect,
+.feedback {
+  background: #f1d6dc;
+  color: #65303d;
+  border-color: #af6575;
+}
+.lesson-nav button {
+  color: #61506f;
+}
+.lesson-nav button.active {
+  background: #ded0ee;
+  color: #3b2b50;
+  border-color: #73528f;
+}
+.tag {
+  color: #503667;
+  background: #e2d4ef;
+  border: 1px solid #8d719f;
+}
+.encounter-brief,
+.battle-loadout {
+  background: #f2eaf7;
+  color: #4a395c;
+  border-color: #826692;
+}
+.pixel-battle {
+  background: #7cb2d7;
+  border-color: #3b3048;
+}
+.pixel-battle > .skybound-scenery {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+}
+.pixel-battle .skybound-scenery img {
+  object-position: 50% 68%;
+}
+.pixel-battle .arena-vignette {
+  background: linear-gradient(#15273d77, transparent 48%, #26324766);
+}
+.pixel-battle.enraged > .arena-scenery {
+  filter: saturate(1.1);
+}
+.arena .boss-health .meter {
+  background: #d3bdce;
+  border-color: #4b3857;
+}
+.arena .boss-health .meter > span {
+  background: #aa75ba;
+}
+.arena .boss-health,
+.arena .arena-top {
+  color: #fff;
+  text-shadow: 1px 2px #172334;
+}
+.arena .hunter-hud {
+  color: #edf3ff;
+}
+.battle-guide {
+  background: #eee6f4;
+}
+.tactical-readout {
+  background: #252537;
+  color: #e7eaf7;
+  border: 2px solid #4b3f5a;
+  border-radius: 4px;
+}
+.tactical-readout span {
+  color: #c0c7e2;
+}
+.tactical-readout strong {
+  color: #f5d487 !important;
+}
+.tactical-readout p {
+  color: #d0d4e6 !important;
+}
+.command {
+  background: #e6dbef;
+  color: #3b2d4d;
+  border: 2px solid #6c527e;
+  box-shadow: 3px 4px #42324f;
+  border-radius: 4px;
+}
+.command small {
+  color: #6c587b;
+}
+.command:disabled {
+  opacity: 0.55;
+}
+.raid-arena > .skybound-scenery {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+}
+.raid-arena-content {
+  background: linear-gradient(#15283c99, #15283c00 65%, #15283c77);
+  color: #fff;
+}
+.raid-arena h2 {
+  color: #fff9da;
+  text-shadow: 2px 2px #21354e;
+}
+.modal {
+  background: #f3ecf8;
+  color: #3d2d4f;
+  border: 3px solid #5c4074;
+}
+.sky-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sky-sparkles i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #fff7b1;
+  left: 72%;
+  top: 40%;
+  animation: islandSparkle 3s steps(4, end) infinite;
+}
+.sky-sparkles i:nth-child(2) {
+  left: 84%;
+  top: 52%;
+  animation-delay: 1s;
+}
+.sky-sparkles i:nth-child(3) {
+  left: 58%;
+  top: 66%;
+  animation-delay: 2s;
+}
+@keyframes islandSparkle {
+  50% {
+    opacity: 0.2;
+    transform: translateY(-8px);
+  }
+}
+@media (max-width: 650px) {
+  .hero {
+    height: 610px;
+  }
+  .hero > .skybound-scenery {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hero > .skybound-scenery img {
+    object-position: 57% 50%;
+  }
+  .hero-content {
+    margin: 15px;
+    padding: 18px;
+    width: calc(100% - 30px);
+    max-width: none;
+  }
+  .hero h2 {
+    font-size: 28px;
+  }
+  .hero-adventurer {
+    bottom: 85px;
+    left: 12%;
+  }
+  .hero-adventurer > .hunter-illustration {
+    width: 100px;
+    height: 120px;
+  }
+  .location {
+    bottom: 16px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+  .panel,
+  .stat-card,
+  .quest-card {
+    box-shadow: 3px 4px #3d314f;
+  }
+  .pixel-destinations {
+    gap: 12px;
+  }
+}
+.topbar
+  :is(
+    .breadcrumb,
+    .breadcrumb > span,
+    .currency,
+    .currency span,
+    .solo,
+    .icon-button
+  ) {
+  color: #59486b;
+}
+.side-user strong,
+.side-user small,
+.campaign-side > .tiny {
+  color: #544163;
+}
+.lesson-nav,
+.lesson-nav > span,
+.lesson-nav.selected > span {
+  color: #493755;
+}
+.lesson-nav.selected {
+  color: #382849;
+  background: #d9cce9;
+  border-color: #806394;
+}
+.lesson-number {
+  color: #f0eafa !important;
+}
+.panel:not(.arena):not(.raid-arena) span {
+  color: inherit;
+}
+.panel:not(.arena):not(.raid-arena) .tactical-readout span {
+  color: #c0c7e2;
+}
+.battle-loadout :is(strong, span),
+.battle-guide .guide-stat :is(span, b) {
+  color: #574166;
+}
+.career-choice,
+.pet-choice {
+  background: #e5d9ef;
+  border: 2px solid #836895;
+  color: #483454;
+}
+.career-choice.selected,
+.pet-choice.selected {
+  background: #d8eaca;
+  border-color: #517a48;
+}
+.career-choice strong,
+.pet-choice strong {
+  color: #3d2d4e;
+}
+.career-choice > span,
+.pet-choice > span {
+  color: #665173;
+}
+.card-button {
+  color: #453156;
+  background: #d9cbe8;
+  border-color: #7c628d;
+}
+.lesson-progress,
+.boss-mini,
+.boss-level,
+.section-heading > span {
+  color: #675177;
+}
+.quest-symbol {
+  color: #664c89;
+  background: #ded0ee;
+  border-color: #a189b8;
+}
+.adventurer-idle {
+  animation: adventurerIdle 2s steps(3, end) infinite;
+}
+@keyframes adventurerIdle {
+  50% {
+    transform: translateY(-1px);
+  }
+}

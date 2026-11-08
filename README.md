@@ -1,6 +1,6 @@
-# Quest Rank · Neon Protocol 1.3.0
+# Quest Rank · Skybound 1.4.0
 
-A solo-first pixel sci-fi learning RPG. Awaken a Cloud Initiate, study identity and access fundamentals, review mistakes, and challenge the IAM Warden in the Citadel of Identity.
+A solo-first pixel adventure learning RPG. Awaken a Cloud Initiate, study identity and access fundamentals, review mistakes, and challenge the IAM Warden in the Citadel of Identity.
 
 **Play:** https://camrinai.github.io/Career-GAme/
 
@@ -9,6 +9,8 @@ A solo-first pixel sci-fi learning RPG. Awaken a Cloud Initiate, study identity 
 The original five-sprint IAM release and 2–4 player cross-career Rift Raids now share an original pixel-art presentation. This release adds stepped sprite animation, moonlit tile scenery, pixel hint companions, party sprites in raids, action-specific combat motion, an ultimate cut-in and a replay-animation control. Pyxel is a visual reference; the game remains React/TypeScript in the browser, with no Python installation. See `PIXEL-UPDATE.md` for details and validation. Complete non-cloud career curricula, accounts, guilds and free-roaming exploration remain future work.
 
 The Neon Protocol update adds an orbital station/hangar, powered-armor sprites, cyan/magenta interface, target acquisition effects and live solo combat telemetry. See `NEON-UPDATE.md` for research, rationale and validation.
+
+The Skybound graphics release follows the supplied visual reference: detailed floating islands, a new backpack adventurer, a blue-roof castle and waterfall, lavender window panels, green buttons and bold outlined progress cards. See `SKYBOUND-UPDATE.md` for research, assets and verification.
 
 ## Run, test and build
 

@@ -60,7 +60,7 @@ import { recordAnswer, reviewQuestions } from "./learning";
 import { BackupControls } from "./BackupControls";
 import { ContractBoard } from "./Contracts";
 import { BattleEffects, type BattleCue } from "./BattleEffects";
-import { Scenery, Warden, Hunter } from "./Scenery";
+import { Scenery, Warden, Hunter, PixelPet } from "./Scenery";
 import {
   ObjectiveCard,
   RankProgress,
@@ -78,6 +78,7 @@ import {
 } from "./progression";
 import "./styles.css";
 import "./pixel.css";
+import "./adventure.css";
 type Page =
   | "raid"
   | "pathfinder"
@@ -414,20 +415,24 @@ function App() {
               </section>
               <section className="hero">
                 <Scenery />
+                <div className="hero-adventurer" aria-hidden="true">
+                  <Hunter />
+                  <PixelPet pet="fox" name="Cipher Fox" />
+                </div>
                 <div className="hero-shade" />
                 <div className="hero-content">
                   <div className="pill">
-                    <Sparkles size={12} /> NEXUS ORBITAL · SECTOR 01
+                    <Sparkles size={12} /> SKY ISLANDS · CHAPTER 01
                   </div>
                   <h2>
-                    Upgrade your skills.
+                    Small quests.
                     <br />
-                    <em>Defend the future.</em>
+                    <em>Big adventures.</em>
                   </h2>
                   <p>
-                    The station’s identity core is under siege. Master cloud
-                    skills,
-                    <br className="desktop" /> restore the firewall, and unlock
+                    Your adventure starts with one new skill. Explore the
+                    islands,
+                    <br className="desktop" /> master cloud identity, and unlock
                     your potential.
                   </p>
                   <div className="hero-actions">
@@ -886,7 +891,7 @@ function App() {
           )}
           <footer>
             <span>
-              <Hexagon size={13} /> QUEST RANK <b>·</b> NEON PROTOCOL v1.3.0
+              <Hexagon size={13} /> QUEST RANK <b>·</b> SKYBOUND v1.4.0
             </span>
             <p>An original adventure. Real skills. Limitless potential.</p>
             <span className="footer-disclaimer">
@@ -1386,7 +1391,7 @@ function Dungeon({
       <PageHeading
         label="CITADEL OF IDENTITY · BOSS ENCOUNTER"
         title="The IAM Warden"
-        sub="An autonomous security mech has locked the identity core. Prove your access. Break the seal."
+        sub="The guardian of the floating Citadel tests every adventurer. Learn its patterns and prove your knowledge."
       />
       <details className="panel encounter-brief">
         <summary>First time here? Learn the battle in 30 seconds</summary>
@@ -1505,15 +1510,15 @@ function Dungeon({
           </div>
         </section>
         <aside className="panel battle-guide">
-          <div className="eyebrow">LIVE TACTICAL LINK</div>
-          <h3>Read the signal.</h3>
+          <div className="eyebrow">ADVENTURER’S FIELD GUIDE</div>
+          <h3>Plan your next move.</h3>
           <div className="tactical-readout" aria-label="Live battle telemetry">
             <div>
-              <span>CORE INTEGRITY</span>
+              <span>GUARDIAN HEALTH</span>
               <strong>{Math.ceil((battle.boss / 240) * 100)}%</strong>
             </div>
             <div>
-              <span>ENEMY RESPONSE</span>
+              <span>GUARDIAN RESPONSE</span>
               <strong>
                 {battle.status !== "active"
                   ? "OFFLINE"
@@ -1532,8 +1537,8 @@ function Dungeon({
                 : battle.status === "defeat"
                   ? "Link lost. Review your answers and redeploy."
                   : battle.boss > 120
-                    ? "At 120 HP, the mech enters overdrive and its retaliation increases."
-                    : "Overdrive active. Guard limits the next hit to 9 HP."}
+                    ? "At 120 HP, the guardian enters phase II and its retaliation increases."
+                    : "Phase II active. Guard limits the next hit to 9 HP."}
             </p>
           </div>
           <p>

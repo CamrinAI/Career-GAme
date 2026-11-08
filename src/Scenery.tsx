@@ -2,32 +2,6 @@ import type { Career, Pet } from "./raid";
 
 // Original low-resolution sprites. One character is one pixel; SVG keeps the
 // integer grid sharp at every display size without external asset requests.
-const hunter = [
-  "........hhhhh...........",
-  ".......hHHHHHh..........",
-  "......hHHHHHHHh.........",
-  "......hHssssHh..........",
-  "......heeeeeeh..........",
-  ".......sssss............",
-  ".....ccaaaaac...........",
-  "....cCCaAAaAcc..........",
-  "...cCCcaAAAacc..........",
-  "...cCcgaAAAgacc.........",
-  "...cCgggaAgggcc....w....",
-  "....cgggAAAggc....wWw...",
-  "....c.ggAAAgg....wWWw...",
-  "...cc..aaaaa.....wWWw...",
-  "...cc..bBBbbgggggwWWw...",
-  "...cc..bBBbb.....wWWw...",
-  "...cc..bB.bb......wW....",
-  "...cc..bB.bb.....gggg...",
-  "...cc..bB.bb......gg....",
-  "....c..bB.bb............",
-  ".......bb.bbb...........",
-  "......ggg.gggg..........",
-  "......ggg.gggg..........",
-  "........................",
-];
 const warden = [
   "......v............v......",
   "......vv..........vv......",
@@ -142,30 +116,20 @@ export function Hunter({ career = "cloud" }: { career?: Career }) {
   return (
     <svg
       className={`hunter-illustration pixel-sprite career-${career}`}
-      viewBox="0 0 24 26"
+      viewBox="0 0 100 120"
       role="img"
-      aria-label={`Pixel ${career} pilot in powered armor with a plasma blade`}
-      shapeRendering="crispEdges"
+      aria-label={`Pixel ${career} adventurer with a backpack and crystal blade`}
     >
-      <path d="M4 24h17v1H4z" fill="#080e24" opacity=".6" />
-      <g className="sprite-idle">
-        <Pixels
-          rows={hunter}
-          palette={{
-            h: "#17213c",
-            H: "#b7cfdf",
-            s: "#456a8d",
-            e: "#a2ffff",
-            c: "#29284f",
-            C: "#645a9c",
-            a: "#304b65",
-            A: accents[career],
-            g: "#b4c8dc",
-            b: "#16223b",
-            B: "#48627f",
-            w: "#479aaf",
-            W: "#c7fff3",
-          }}
+      <ellipse cx="50" cy="116" rx="29" ry="3" fill="#302534" opacity=".2" />
+      <path d="M35 115h30" stroke={accents[career]} strokeWidth="2" />
+      <g className="adventurer-idle">
+        <image
+          href={new URL("./assets/adventurer.png", import.meta.url).href}
+          x="0"
+          y="0"
+          width="100"
+          height="114"
+          preserveAspectRatio="xMidYMax meet"
         />
       </g>
     </svg>
@@ -177,7 +141,7 @@ export function Warden() {
       className="warden pixel-sprite"
       viewBox="0 0 26 31"
       role="img"
-      aria-label="Pixel Warden security mech with a glowing reactor"
+      aria-label="Pixel Citadel guardian with a glowing crystal heart"
       shapeRendering="crispEdges"
     >
       <path d="M3 29h20v1H3z" fill="#090d23" opacity=".65" />
@@ -186,11 +150,11 @@ export function Warden() {
           rows={warden}
           palette={{
             v: "#1e1c37",
-            V: "#3b537c",
-            L: "#84b6d4",
+            V: "#596cc0",
+            L: "#b2c5eb",
             d: "#30334d",
             E: "#9ffff3",
-            p: "#bb56c9",
+            p: "#dfb950",
             P: "#f0cfff",
           }}
         />
@@ -227,7 +191,7 @@ export function PixelPet({ pet, name }: { pet: Pet; name: string }) {
     </svg>
   );
 }
-export function Scenery({ arena = false }: { arena?: boolean }) {
+export function OrbitalScenery({ arena = false }: { arena?: boolean }) {
   return (
     <svg
       className={`scenery pixel-landscape orbital-scene ${arena ? "arena-scenery" : ""}`}
@@ -355,5 +319,29 @@ export function Scenery({ arena = false }: { arena?: boolean }) {
         </g>
       )}
     </svg>
+  );
+}
+
+export function Scenery({ arena = false }: { arena?: boolean }) {
+  return (
+    <div
+      className={`scenery skybound-scenery ${arena ? "arena-scenery" : ""}`}
+      role="img"
+      aria-label={
+        arena
+          ? "Pixel grassy battleground beneath a floating castle and waterfall"
+          : "Colorful pixel islands with a blue-roof castle, waterfall, trees and a wooden bridge"
+      }
+    >
+      <img
+        src={new URL("./assets/sky-islands.png", import.meta.url).href}
+        alt=""
+      />
+      <span className="sky-sparkles" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+    </div>
   );
 }
