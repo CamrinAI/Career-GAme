@@ -207,12 +207,31 @@ export function RaidHall({
                   disabled={connecting}
                   onClick={() => setCareer(id)}
                 >
+                  <span className="role-model-thumbnail" aria-hidden="true">
+                    <Hunter career={id} />
+                  </span>
                   <span className="eyebrow">{entry.role}</span>
                   <strong>{entry.name}</strong>
                   <span>{entry.description}</span>
                   {career === id && <Check size={18} />}
                 </button>
               ))}
+            </div>
+            <div
+              className="raid-role-preview"
+              aria-label="Selected character appearance"
+            >
+              <Hunter career={career} />
+              <div>
+                <span className="eyebrow">YOUR RAID CHARACTER</span>
+                <h3>{careers[career].name}</h3>
+                <p>
+                  {career === "nurse"
+                    ? "Field medic uniform · medical backpack · diagnostic scanner. Ready to support the party."
+                    : "Explorer flight suit · life-support pack · energy tool. Ready for the next mission."}
+                </p>
+                <span className="tag">{careers[career].role}</span>
+              </div>
             </div>
             <p className="raid-note">
               These are raid roles, not complete career courses or credentials.

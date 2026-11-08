@@ -592,3 +592,70 @@ select {
     transform: translateY(-1px);
   }
 }
+/* Keep the bright adventure palette; the world and costumes carry the sci-fi setting. */
+.raid-role-preview {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 22px 0 10px;
+  padding: 20px;
+  background: #e0eaf5;
+  border: 2px solid #75638a;
+  border-radius: 6px;
+}
+.raid-role-preview > .hunter-illustration {
+  width: 120px;
+  height: 160px;
+  flex: 0 0 120px;
+  filter: none;
+}
+.raid-role-preview h3 {
+  margin: 10px 0;
+  font-size: 21px;
+}
+.raid-role-preview p {
+  max-width: 430px;
+  margin-bottom: 12px;
+}
+.role-model-thumbnail {
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  height: 100px;
+  margin-bottom: 14px;
+}
+.role-model-thumbnail .hunter-illustration {
+  width: 85px;
+  height: 100px;
+  filter: none;
+}
+.career-choice {
+  position: relative;
+}
+.career-choice > .role-model-thumbnail {
+  color: inherit;
+}
+@media (max-width: 650px) {
+  .raid-role-preview {
+    padding: 14px;
+    gap: 12px;
+  }
+  .raid-role-preview > .hunter-illustration {
+    width: 90px;
+    height: 125px;
+    flex-basis: 90px;
+  }
+  .raid-role-preview h3 {
+    font-size: 17px;
+  }
+  .raid-role-preview p {
+    font-size: 11px;
+  }
+  .role-model-thumbnail {
+    height: 80px;
+  }
+  .role-model-thumbnail .hunter-illustration {
+    height: 80px;
+    width: 70px;
+  }
+}

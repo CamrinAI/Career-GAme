@@ -422,7 +422,7 @@ function App() {
                 <div className="hero-shade" />
                 <div className="hero-content">
                   <div className="pill">
-                    <Sparkles size={12} /> SKY ISLANDS · CHAPTER 01
+                    <Sparkles size={12} /> NEXUS ECO-STATION · CHAPTER 01
                   </div>
                   <h2>
                     Small quests.
@@ -891,7 +891,7 @@ function App() {
           )}
           <footer>
             <span>
-              <Hexagon size={13} /> QUEST RANK <b>·</b> SKYBOUND v1.4.0
+              <Hexagon size={13} /> QUEST RANK <b>·</b> SKYBOUND ORBIT v1.5.0
             </span>
             <p>An original adventure. Real skills. Limitless potential.</p>
             <span className="footer-disclaimer">
@@ -1391,7 +1391,7 @@ function Dungeon({
       <PageHeading
         label="CITADEL OF IDENTITY · BOSS ENCOUNTER"
         title="The IAM Warden"
-        sub="The guardian of the floating Citadel tests every adventurer. Learn its patterns and prove your knowledge."
+        sub="The Citadel’s security robot guards the station core. Read its signals and prove your knowledge."
       />
       <details className="panel encounter-brief">
         <summary>First time here? Learn the battle in 30 seconds</summary>
