@@ -732,3 +732,244 @@ progress {
     margin-left: 0;
   }
 }
+
+/* Neon Protocol: orbital sci-fi art direction. */
+:root {
+  --purple: #a6baff;
+  --cyan: #65ede1;
+  --muted: #a1b4cd;
+  --border: #2c4966;
+  --panel: #101e33;
+}
+body {
+  background: #081324;
+}
+.sidebar {
+  background: #0b1829;
+  border-color: #28445f;
+}
+.brand-mark {
+  background: #6adbd7;
+  color: #0a2537;
+}
+.nav-item.active {
+  color: #a6fff3;
+  background: linear-gradient(90deg, #183b47, #16273f);
+  border-color: #3a8c94;
+}
+.nav-item.active:before {
+  background: #66e8dd;
+  box-shadow: 0 0 12px #66e8dd55;
+}
+.nav-item.active svg {
+  color: #7aeee1;
+}
+.panel,
+.stat-card {
+  background-color: #101e33;
+  border-color: #2b4866;
+}
+.primary {
+  background: #7ce8dc;
+  color: #082639;
+  border-color: #a1fff0;
+  box-shadow:
+    inset 0 -3px #358d91,
+    3px 3px #050e1b;
+}
+.hero {
+  border-color: #426b87;
+  height: 390px;
+}
+.hero h2 {
+  font-size: clamp(26px, 3vw, 40px);
+  letter-spacing: -1.6px;
+}
+.hero h2 em {
+  color: #83f4e5;
+}
+.hero-shade {
+  background: linear-gradient(
+    90deg,
+    #071427f5,
+    #071427d9 34%,
+    #07142744 65%,
+    transparent
+  );
+}
+.hero .pill {
+  color: #9affe7;
+  border-color: #467e89;
+  background: #102c3bc9;
+}
+.location {
+  background: #0b2235ed;
+  border: 1px solid #3b7383;
+}
+.nexus-raid-invite {
+  border-left: 3px solid #73e8e2;
+  background: linear-gradient(110deg, #102b3c, #101b31);
+}
+.pixel-destinations button {
+  background: #102539;
+  border-color: #375d79;
+}
+.pixel-stop {
+  color: #6aeadc;
+}
+.pixel-battle {
+  border-color: #48778b;
+}
+.pixel-battle.enraged {
+  border-color: #df78b0;
+}
+.pixel-battle.enraged > .arena-scenery {
+  filter: hue-rotate(25deg);
+}
+.orbital-planet {
+  animation: planetDrift 20s steps(12, end) infinite alternate;
+}
+.orbital-traffic {
+  animation: orbitalTransit 16s steps(28, end) infinite;
+}
+.nexus-station {
+  animation: pixelFloat 5s steps(5, end) infinite;
+}
+.station-thrust,
+.hangar-conduit {
+  animation: pixelTwinkle 2.4s steps(3, end) infinite;
+}
+.pixel-battle .arena-vignette {
+  background: linear-gradient(#06132777, transparent 50%, #07152788);
+}
+.tactical-readout {
+  background: #091b2c;
+  border: 1px solid #3c617b;
+  padding: 12px;
+  margin: 16px 0;
+}
+.tactical-readout > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid #294359;
+}
+.tactical-readout span {
+  font:
+    8px ui-monospace,
+    monospace;
+  letter-spacing: 0.5px;
+  color: #9eb4c8;
+}
+.tactical-readout strong {
+  color: #e6b1d4;
+  font:
+    11px ui-monospace,
+    monospace;
+  white-space: nowrap;
+}
+.tactical-readout .signal-ready {
+  color: #84f4d2;
+}
+.tactical-readout p {
+  margin: 12px 0 0;
+  color: #c0d4e1;
+  font-size: 11px;
+}
+.target-lock {
+  position: absolute;
+  width: 100px;
+  height: 110px;
+  right: 20%;
+  top: 40%;
+  opacity: 0;
+  animation: targetAcquire 0.9s steps(6, end);
+}
+.target-lock i {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-top: 2px solid #9effe9;
+  border-left: 2px solid #9effe9;
+}
+.target-lock i:nth-child(2) {
+  right: 0;
+  transform: rotate(90deg);
+}
+.target-lock i:nth-child(3) {
+  bottom: 0;
+  transform: rotate(-90deg);
+}
+.target-lock i:nth-child(4) {
+  right: 0;
+  bottom: 0;
+  transform: rotate(180deg);
+}
+.counter .target-lock {
+  left: 16%;
+  right: auto;
+}
+.guard .target-lock {
+  display: none;
+}
+.skill-flash {
+  background: #082b3ee8;
+  color: #a9fff2;
+  border-color: #6fe4e2;
+}
+.pixel-cut-in {
+  background: repeating-linear-gradient(0deg, #12304c 0 5px, #0b263e 5px 10px);
+  border-color: #79e7df;
+}
+@keyframes planetDrift {
+  to {
+    transform: translateY(3px);
+  }
+}
+@keyframes orbitalTransit {
+  from {
+    transform: translateX(-30px);
+  }
+  to {
+    transform: translateX(30px);
+  }
+}
+@keyframes targetAcquire {
+  15%,
+  70% {
+    opacity: 1;
+  }
+  from {
+    transform: scale(1.4);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+@media (max-width: 650px) {
+  .hero {
+    height: 430px;
+  }
+  .hero h2 {
+    font-size: 27px;
+    letter-spacing: -1px;
+  }
+  .hero-shade {
+    background:
+      linear-gradient(90deg, #071427ef, #07142766),
+      linear-gradient(0deg, #071427f5, transparent 70%);
+  }
+  .tactical-readout {
+    margin: 12px 0;
+  }
+}
+.battle-guide > p { display: none; }
+.battle-guide .guide-stat { padding-block: 8px; }
+@media (max-width: 800px) {
+  .battle-layout { grid-template-columns: 1fr; }
+  .battle-guide { display: block; padding: 16px; }
+  .battle-guide > .eyebrow, .battle-guide > h3, .battle-guide > .guide-stat, .battle-guide > button { display: none; }
+  .battle-guide .tactical-readout { margin: 0; }
+}

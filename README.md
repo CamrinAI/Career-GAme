@@ -1,12 +1,14 @@
-# Quest Rank · Pixel Chronicles 1.2.0
+# Quest Rank · Neon Protocol 1.3.0
 
-A solo-first pixel fantasy learning RPG. Awaken a Cloud Initiate, study identity and access fundamentals, review mistakes, and challenge the IAM Warden in the Citadel of Identity.
+A solo-first pixel sci-fi learning RPG. Awaken a Cloud Initiate, study identity and access fundamentals, review mistakes, and challenge the IAM Warden in the Citadel of Identity.
 
 **Play:** https://camrinai.github.io/Career-GAme/
 
 **Review:** https://github.com/CamrinAI/Career-GAme/pull/1
 
 The original five-sprint IAM release and 2–4 player cross-career Rift Raids now share an original pixel-art presentation. This release adds stepped sprite animation, moonlit tile scenery, pixel hint companions, party sprites in raids, action-specific combat motion, an ultimate cut-in and a replay-animation control. Pyxel is a visual reference; the game remains React/TypeScript in the browser, with no Python installation. See `PIXEL-UPDATE.md` for details and validation. Complete non-cloud career curricula, accounts, guilds and free-roaming exploration remain future work.
+
+The Neon Protocol update adds an orbital station/hangar, powered-armor sprites, cyan/magenta interface, target acquisition effects and live solo combat telemetry. See `NEON-UPDATE.md` for research, rationale and validation.
 
 ## Run, test and build
 

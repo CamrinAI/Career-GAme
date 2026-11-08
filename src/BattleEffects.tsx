@@ -31,11 +31,17 @@ export function BattleEffects({ cue }: { cue: BattleCue | null }) {
         <div className="pixel-cut-in">
           <Hunter />
           <div>
-            <small>ULTIMATE TECHNIQUE</small>
+            <small>NEURAL LINK · FULL CHARGE</small>
             <strong>Identity rupture</strong>
           </div>
         </div>
       )}
+      <div className="target-lock">
+        <i />
+        <i />
+        <i />
+        <i />
+      </div>
       <div className="pixel-impact">
         <i />
         <i />

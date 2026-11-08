@@ -417,16 +417,17 @@ function App() {
                 <div className="hero-shade" />
                 <div className="hero-content">
                   <div className="pill">
-                    <Sparkles size={12} /> PIXEL CHRONICLES · CHAPTER 01
+                    <Sparkles size={12} /> NEXUS ORBITAL · SECTOR 01
                   </div>
                   <h2>
-                    Ordinary today.
+                    Upgrade your skills.
                     <br />
-                    <em>Legendary tomorrow.</em>
+                    <em>Defend the future.</em>
                   </h2>
                   <p>
-                    A new world is waiting. Master real cloud skills,
-                    <br className="desktop" /> conquer the Citadel, and awaken
+                    The station’s identity core is under siege. Master cloud
+                    skills,
+                    <br className="desktop" /> restore the firewall, and unlock
                     your potential.
                   </p>
                   <div className="hero-actions">
@@ -457,7 +458,7 @@ function App() {
                     <Compass size={20} />
                   </span>
                   <div>
-                    <small>YOUR NEXT DESTINATION</small>
+                    <small>MISSION DESTINATION</small>
                     <strong>Citadel of Identity</strong>
                   </div>
                   <span className="rank-mini">C</span>
@@ -885,7 +886,7 @@ function App() {
           )}
           <footer>
             <span>
-              <Hexagon size={13} /> QUEST RANK <b>·</b> PIXEL CHRONICLES v1.2.0
+              <Hexagon size={13} /> QUEST RANK <b>·</b> NEON PROTOCOL v1.3.0
             </span>
             <p>An original adventure. Real skills. Limitless potential.</p>
             <span className="footer-disclaimer">
@@ -1385,7 +1386,7 @@ function Dungeon({
       <PageHeading
         label="CITADEL OF IDENTITY · BOSS ENCOUNTER"
         title="The IAM Warden"
-        sub="The gatekeeper tests your knowledge. Your decisions shape the battle."
+        sub="An autonomous security mech has locked the identity core. Prove your access. Break the seal."
       />
       <details className="panel encounter-brief">
         <summary>First time here? Learn the battle in 30 seconds</summary>
@@ -1504,8 +1505,37 @@ function Dungeon({
           </div>
         </section>
         <aside className="panel battle-guide">
-          <div className="eyebrow">FIELD NOTES</div>
-          <h3>Read. React. Rise.</h3>
+          <div className="eyebrow">LIVE TACTICAL LINK</div>
+          <h3>Read the signal.</h3>
+          <div className="tactical-readout" aria-label="Live battle telemetry">
+            <div>
+              <span>CORE INTEGRITY</span>
+              <strong>{Math.ceil((battle.boss / 240) * 100)}%</strong>
+            </div>
+            <div>
+              <span>ENEMY RESPONSE</span>
+              <strong>
+                {battle.status !== "active"
+                  ? "OFFLINE"
+                  : `${battle.phase === 2 ? 26 : 18} DMG`}
+              </strong>
+            </div>
+            <div>
+              <span>ULTIMATE CHARGE</span>
+              <strong className={battle.sp >= 70 ? "signal-ready" : ""}>
+                {battle.sp >= 70 ? "READY" : `${70 - battle.sp} SP TO GO`}
+              </strong>
+            </div>
+            <p>
+              {battle.status === "victory"
+                ? "Access restored. The core is secure."
+                : battle.status === "defeat"
+                  ? "Link lost. Review your answers and redeploy."
+                  : battle.boss > 120
+                    ? "At 120 HP, the mech enters overdrive and its retaliation increases."
+                    : "Overdrive active. Guard limits the next hit to 9 HP."}
+            </p>
+          </div>
           <p>
             Correct answers power attacks and restore 20 SP. Mistakes deal no
             damage and trigger a counterattack.

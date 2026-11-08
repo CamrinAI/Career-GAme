@@ -7,7 +7,7 @@ const hunter = [
   ".......hHHHHHh..........",
   "......hHHHHHHHh.........",
   "......hHssssHh..........",
-  "......hssesssh..........",
+  "......heeeeeeh..........",
   ".......sssss............",
   ".....ccaaaaac...........",
   "....cCCaAAaAcc..........",
@@ -17,7 +17,7 @@ const hunter = [
   "....cgggAAAggc....wWw...",
   "....c.ggAAAgg....wWWw...",
   "...cc..aaaaa.....wWWw...",
-  "...cc..bBBbb.....wWWw...",
+  "...cc..bBBbbgggggwWWw...",
   "...cc..bBBbb.....wWWw...",
   "...cc..bB.bb......wW....",
   "...cc..bB.bb.....gggg...",
@@ -144,7 +144,7 @@ export function Hunter({ career = "cloud" }: { career?: Career }) {
       className={`hunter-illustration pixel-sprite career-${career}`}
       viewBox="0 0 24 26"
       role="img"
-      aria-label={`Pixel ${career} hunter with an energy blade`}
+      aria-label={`Pixel ${career} pilot in powered armor with a plasma blade`}
       shapeRendering="crispEdges"
     >
       <path d="M4 24h17v1H4z" fill="#080e24" opacity=".6" />
@@ -153,9 +153,9 @@ export function Hunter({ career = "cloud" }: { career?: Career }) {
           rows={hunter}
           palette={{
             h: "#17213c",
-            H: "#dfecff",
-            s: "#ecba9c",
-            e: "#20334b",
+            H: "#b7cfdf",
+            s: "#456a8d",
+            e: "#a2ffff",
             c: "#29284f",
             C: "#645a9c",
             a: "#304b65",
@@ -177,7 +177,7 @@ export function Warden() {
       className="warden pixel-sprite"
       viewBox="0 0 26 31"
       role="img"
-      aria-label="Pixel Warden in violet crystal armor"
+      aria-label="Pixel Warden security mech with a glowing reactor"
       shapeRendering="crispEdges"
     >
       <path d="M3 29h20v1H3z" fill="#090d23" opacity=".65" />
@@ -186,11 +186,11 @@ export function Warden() {
           rows={warden}
           palette={{
             v: "#1e1c37",
-            V: "#60538e",
-            L: "#b49bcc",
+            V: "#3b537c",
+            L: "#84b6d4",
             d: "#30334d",
             E: "#9ffff3",
-            p: "#a16bdf",
+            p: "#bb56c9",
             P: "#f0cfff",
           }}
         />
@@ -230,124 +230,130 @@ export function PixelPet({ pet, name }: { pet: Pet; name: string }) {
 export function Scenery({ arena = false }: { arena?: boolean }) {
   return (
     <svg
-      className={`scenery pixel-landscape ${arena ? "arena-scenery" : ""}`}
+      className={`scenery pixel-landscape orbital-scene ${arena ? "arena-scenery" : ""}`}
       viewBox="0 0 320 168"
       preserveAspectRatio="xMidYMid slice"
       role="img"
       aria-label={
         arena
-          ? "Pixel moonlit citadel battleground"
-          : "Pixel floating citadel above moonlit mountains and a glowing river"
+          ? "Pixel orbital hangar with holographic conduits and a planet beyond the viewport"
+          : "Pixel Nexus space station orbiting a cyan planet beneath a star field"
       }
       shapeRendering="crispEdges"
     >
-      <path fill="#111b35" d="M0 0h320v168H0z" />
-      <path fill="#1c2848" d="M0 45h320v123H0z" />
-      <path fill="#303853" d="M0 80h320v88H0z" />
-      {Array.from({ length: 40 }, (_, i) => (
+      <path fill="#050d20" d="M0 0h320v168H0z" />
+      {Array.from({ length: 65 }, (_, i) => (
         <rect
-          className={i % 5 === 0 ? "pixel-star" : ""}
           key={i}
-          x={(i * 43 + 7) % 320}
-          y={(i * 17 + 4) % 75}
-          width={i % 5 === 0 ? 2 : 1}
+          className={i % 7 === 0 ? "pixel-star" : ""}
+          x={(i * 43 + 9) % 320}
+          y={(i * 19 + 4) % 125}
+          width={i % 6 === 0 ? 2 : 1}
           height="1"
-          fill={i % 3 ? "#849cbb" : "#e3d8b3"}
+          fill={i % 3 ? "#47638a" : "#d0eaff"}
         />
       ))}
-      <path
-        fill="#e5d9b0"
-        d="M257 12h14v3h5v5h3v14h-3v5h-5v3h-14v-3h-5v-5h-3V20h3v-5h5z"
-      />
-      <path fill="#bcb9a1" d="M271 15h5v5h3v14h-3v5h-5v3h-7v-3h6v-5h3V21h-2z" />
-      <g fill="#4a506b">
-        <path d="M0 94h15v-8h12v-9h9v-8h8v-8h9v14h9v9h13v12h14v72H0zM90 100h12V88h12V77h9V65h8v-9h9v14h10v13h13v17h16v68H90zM230 105h12V88h9V78h9V62h7v-9h10v19h10v15h15v11h18v70h-90z" />
+      <g className="orbital-planet">
+        <path
+          fill="#163c66"
+          d="M222 14h44v4h12v6h8v10h5v14h3v26h-3v14h-5v10h-8v7h-12v4h-44v-4h-12v-7h-8V88h-5V74h-3V48h3V34h5V24h8v-6h12z"
+        />
+        <path
+          fill="#246b89"
+          d="M222 18h35v4h-15v6h-17v8h-12v15h-7v17h-8V48h3V34h5v-8h16zM264 29h13v7h8v16h4v22h-6V59h-9V45h-10zM218 74h13v6h15v9h14v12h-35v-5h-13V84h6z"
+        />
+        <path
+          fill="#58bcbd"
+          d="M223 23h14v3h-14zM207 43h3v16h-3zM252 86h15v3h-15z"
+        />
+        <path
+          d="M184 81h21v-3h22v-3h26v-3h28v-3h27"
+          stroke="#83e7ee"
+          strokeWidth="2"
+          fill="none"
+        />
       </g>
-      <path
-        fill="#303e5b"
-        d="M0 114h24v-9h19v-9h15v10h15v12h16v-9h19v-8h12v-7h13v12h17v12h19v-10h20V96h18v12h19v10h16v-12h21v-9h15v14h18v12h24v45H0z"
-      />
-      <path
-        fill="#1b3048"
-        d="M0 130h32v-8h28v10h27v-7h30v9h39v-10h30v9h30v-10h32v10h30v-9h42v44H0z"
-      />
-      <path
-        fill="#3a6676"
-        d="M135 124h36v5h-15v5h-21v6h40v6h30v7h-18v5h-80v-7h30v-7h-30v-7h15v-6h13z"
-      />
-      <g className="river-shimmer" fill="#80b5b0">
-        <path d="M138 129h19v1h-19zM129 138h25v1h-25zM143 147h32v1h-32zM124 155h45v1h-45z" />
+      <g className="orbital-traffic" fill="#7ef0e4">
+        <path d="M151 34h8v2h-8zM146 35h5v1h-5z" />
+        <path fill="#ff8cc8" d="M286 117h11v2h-11z" />
       </g>
-      <g className="floating-citadel">
+      <g className="nexus-station">
         <path
-          fill="#1b223b"
-          d="M185 111h92v7h-9v9h-13v10h-12v10h-11v-8h-13v-12h-18v-8h-16z"
+          fill="#15253e"
+          d="M161 97h129v8H161zM174 105h102v6H174zM189 111h70v9h-70zM214 120h22v17h-22z"
+        />
+        <path fill="#536c88" d="M161 96h129v3H161zM185 108h79v2h-79z" />
+        <path
+          fill="#1e3450"
+          d="M181 79h99v17h-99zM199 62h62v17h-62zM218 32h25v64h-25z"
         />
         <path
-          fill="#43516c"
-          d="M180 105h102v7H180zM192 112h75v5h-75zM216 119h9v12h-9zM238 125h6v14h-6z"
+          fill="#4a6284"
+          d="M218 32h4v64h-4zM199 62h3v17h-3zM181 79h3v17h-3z"
         />
-        <path fill="#627584" d="M185 101h92v5h-92z" />
-        {[198, 219, 244, 261].map((x, i) => (
-          <g key={x}>
-            <path fill="#394862" d={`M${x} ${i % 2 ? 61 : 73}h12v39h-12z`} />
-            <path fill="#77849b" d={`M${x} ${i % 2 ? 61 : 73}h3v39h-3z`} />
-            <path
-              fill="#433b69"
-              d={`M${x - 3} ${i % 2 ? 61 : 73}h18v-4h-3v-4h-3v-4h-6v4h-3v4h-3z`}
-            />
-            <rect
-              x={x + 5}
-              y={i % 2 ? 71 : 82}
-              width="3"
-              height="6"
-              fill="#ffdb9e"
-            />
-          </g>
-        ))}
-        <path fill="#52617e" d="M228 42h17v62h-17z" />
-        <path fill="#94a1b2" d="M228 42h3v62h-3z" />
         <path
-          fill="#625485"
-          d="M224 42h25v-4h-4v-7h-4v-7h-4v-8h-2v8h-4v7h-3v7h-4z"
+          fill="#a4f5f0"
+          d="M225 42h10v3h-10zM225 49h10v3h-10zM225 56h10v3h-10z"
         />
-        <path fill="#e5c1ff" d="M235 48h4v7h-4zM235 60h4v7h-4z" />
-        <path fill="#1e263e" d="M222 104V86h5v-5h18v5h5v18z" />
+        <path
+          fill="#6ee4e0"
+          d="M186 84h22v2h-22zM247 84h26v2h-26zM203 69h11v2h-11zM248 69h9v2h-9z"
+        />
+        <path
+          fill="#ce79dd"
+          d="M226 23h8v9h-8zM229 14h2v9h-2zM216 99h28v3h-28z"
+        />
+        <path fill="#0c192e" d="M211 96V79h4v-5h25v5h4v17z" />
         <path
           className="portal-light"
-          fill="#b6a3ee"
-          d="M228 103V88h5v-3h7v3h4v15z"
+          fill="#66dfec"
+          d="M217 95V81h4v-3h13v3h4v14z"
         />
-        <path fill="#8391a5" d="M226 104h20v3h-20zM222 107h28v3h-28z" />
-        <path className="pixel-banner" fill="#d7a46d" d="M239 17h12v6h-12z" />
+        {[163, 268].map((x) => (
+          <g key={x}>
+            <path fill="#354d71" d={`M${x} 67h12v29h-12z`} />
+            <path
+              fill="#12233f"
+              d={`M${x - 14} 62h10v23h-10zM${x + 17} 62h10v23h-10z`}
+            />
+            <path
+              stroke="#6c92bf"
+              strokeWidth="1"
+              d={`M${x - 9} 63v21M${x + 22} 63v21`}
+            />
+            <path fill="#d182db" d={`M${x + 4} 70h4v8h-4z`} />
+          </g>
+        ))}
+        <g className="station-thrust" fill="#54d5ed">
+          <path d="M193 114h8v14h-8zM249 114h8v14h-8z" />
+          <path fill="#bbfbff" d="M195 114h4v8h-4zM251 114h4v8h-4z" />
+        </g>
       </g>
       {arena && (
         <g>
-          <path fill="#293a4e" d="M0 130h320v38H0z" />
-          <path fill="#58707e" d="M0 131h320v2H0z" />
-          {Array.from({ length: 7 }, (_, y) =>
-            Array.from({ length: 17 }, (_, x) => (
-              <rect
-                key={`${x}-${y}`}
-                x={x * 21 - (y % 2) * 10}
-                y={135 + y * 6}
-                width="19"
-                height="4"
-                fill={(x + y) % 3 ? "#34495b" : "#3f5767"}
-              />
-            )),
-          )}
+          <path fill="#0c1b30" d="M0 126h320v42H0z" />
+          <path fill="#294963" d="M0 126h320v3H0z" />
+          {Array.from({ length: 7 }, (_, i) => (
+            <path
+              key={i}
+              stroke="#26485e"
+              strokeWidth="1"
+              d={`M${i * 65 - 35} 168 ${128 + i * 10} 128M0 ${130 + i * i}h320`}
+            />
+          ))}
+          <path
+            className="hangar-conduit"
+            fill="#64deda"
+            d="M0 145h70v3h35v3h45v2h-48v-2H67v-3H0zM320 145h-64v3h-40v3h-38v2h41v-2h40v-3h61z"
+          />
+          <path
+            fill="#2a3e58"
+            d="M0 0h10v130H0zM310 0h10v130h-10zM0 0h320v5H0z"
+          />
+          <path fill="#6ce9e1" d="M7 24h2v42H7zM311 24h2v42h-2z" />
+          <path fill="#bd6ef0" d="M7 85h2v26H7zM311 85h2v26h-2z" />
         </g>
       )}
-      {[5, 29, 70, 292, 312].map((x, i) => (
-        <g
-          key={x}
-          transform={`translate(${x} ${arena ? 109 : 132 - (i % 2) * 8})`}
-        >
-          <path d="M0 0h4v6h4v6h4v5H-8v-5h4V6h4z" fill="#132a37" />
-          <path d="M0 16h4v10H0z" fill="#162337" />
-        </g>
-      ))}
     </svg>
   );
 }
