@@ -23,6 +23,7 @@ import {
 } from "./raid";
 import { useRaidRoom } from "./useRaidRoom";
 import { Warden, Scenery, Hunter, PixelPet } from "./Scenery";
+import { classAppearances } from "./appearances";
 export function PetPortrait({ pet }: { pet: Pet }) {
   return <PixelPet pet={pet} name={pets[pet].name} />;
 }
@@ -225,11 +226,7 @@ export function RaidHall({
               <div>
                 <span className="eyebrow">YOUR RAID CHARACTER</span>
                 <h3>{careers[career].name}</h3>
-                <p>
-                  {career === "nurse"
-                    ? "Field medic uniform · medical backpack · diagnostic scanner. Ready to support the party."
-                    : "Explorer flight suit · life-support pack · energy tool. Ready for the next mission."}
-                </p>
+                <p>{classAppearances[career].description}</p>
                 <span className="tag">{careers[career].role}</span>
               </div>
             </div>

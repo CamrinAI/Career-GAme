@@ -1,4 +1,4 @@
-# Quest Rank · Skybound Orbit 1.5.0
+# Quest Rank · Class Cosmetics 1.6.0
 
 A solo-first pixel adventure learning RPG. Awaken a Cloud Initiate, study identity and access fundamentals, review mistakes, and challenge the IAM Warden in the Citadel of Identity.
 
@@ -13,6 +13,8 @@ The Neon Protocol update adds an orbital station/hangar, powered-armor sprites, 
 The Skybound graphics release follows the supplied visual reference: detailed floating islands, a new backpack adventurer, a blue-roof castle and waterfall, lavender window panels, green buttons and bold outlined progress cards. See `SKYBOUND-UPDATE.md` for research, assets and verification.
 
 Skybound Orbit keeps the bright palette while adding a futuristic eco-station, space explorer suits, and a dedicated Nurse Sentinel medic model. Raid selection includes model thumbnails and a selected-character preview; the medic also renders through the shared raid character component. See `ORBIT-UPDATE.md`.
+
+The class cosmetics update gives every role a distinct model: Cloud Warden cloud armor, Nurse Sentinel medic gear, Software Vanguard developer outfit and AI Arcanist neural coat with a separate animated holo assistant. Appearance descriptions and assets are shared through `src/appearances.ts`. See `CLASS-COSMETICS.md`.
 
 ## Run, test and build
 

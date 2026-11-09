@@ -1,4 +1,5 @@
 import type { Career, Pet } from "./raid";
+import { classAppearances } from "./appearances";
 
 // Original low-resolution sprites. One character is one pixel; SVG keeps the
 // integer grid sharp at every display size without external asset requests.
@@ -80,12 +81,6 @@ const petSprites: Record<Pet, string[]> = {
     ".......p.......",
   ],
 };
-const accents: Record<Career, string> = {
-  cloud: "#74e4e8",
-  nurse: "#90e6b1",
-  software: "#ffc878",
-  ai: "#bd9dff",
-};
 function Pixels({
   rows,
   palette,
@@ -113,26 +108,19 @@ function Pixels({
   );
 }
 export function Hunter({ career = "cloud" }: { career?: Career }) {
+  const look = classAppearances[career];
   return (
     <svg
       className={`hunter-illustration pixel-sprite career-${career}`}
       viewBox="0 0 100 120"
       role="img"
-      aria-label={
-        career === "nurse"
-          ? "Pixel Nurse Sentinel field medic with a scanner and medical backpack"
-          : `Pixel ${career} space explorer with a life-support pack and energy tool`
-      }
+      aria-label={look.label}
     >
       <ellipse cx="50" cy="116" rx="29" ry="3" fill="#302534" opacity=".2" />
-      <path d="M35 115h30" stroke={accents[career]} strokeWidth="2" />
+      <path d="M35 115h30" stroke={look.accent} strokeWidth="2" />
       <g className="adventurer-idle">
         <image
-          href={
-            career === "nurse"
-              ? new URL("./assets/medic.png", import.meta.url).href
-              : new URL("./assets/space-explorer.png", import.meta.url).href
-          }
+          href={look.asset}
           x="0"
           y="0"
           width="100"
@@ -140,6 +128,49 @@ export function Hunter({ career = "cloud" }: { career?: Career }) {
           preserveAspectRatio="xMidYMax meet"
         />
       </g>
+      {career === "ai" && (
+        <g transform="translate(0 -18)" aria-hidden="true">
+          <g className="holo-assistant">
+            <path d="M79 54 84 51 89 54" fill="#59dfff" opacity=".12" />
+            <ellipse
+              className="holo-orbit"
+              cx="84"
+              cy="42"
+              rx="15"
+              ry="5"
+              fill="none"
+              stroke="#79f7f4"
+              strokeWidth=".8"
+            />
+            <circle
+              cx="84"
+              cy="42"
+              r="11"
+              fill="#142c55"
+              fillOpacity=".85"
+              stroke="#8ffff6"
+              strokeWidth="1.2"
+            />
+            <path
+              d="M77 35h14v2H77zM75 38h18v11H75zM78 49h12v2H78z"
+              fill="#56bff0"
+              fillOpacity=".45"
+            />
+            <path d="M78 40h3v2h-3zM87 40h3v2h-3z" fill="#d4ffff" />
+            <path
+              d="M79 46h2v-2h2v4h2v-3h2v1h2"
+              fill="none"
+              stroke="#a5fff3"
+              strokeWidth="1"
+            />
+            <path
+              d="M74 27h4M92 27h4M74 57h4M92 57h4"
+              stroke="#c5b4ff"
+              strokeWidth="1"
+            />
+          </g>
+        </g>
+      )}
     </svg>
   );
 }

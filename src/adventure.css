@@ -659,3 +659,23 @@ select {
     width: 70px;
   }
 }
+/* The AI assistant is a separate hologram so it can hover beside its owner. */
+.holo-assistant {
+  animation: holoHover 2.4s steps(5, end) infinite;
+}
+.holo-orbit {
+  animation: holoSignal 2s steps(3, end) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes holoHover {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes holoSignal {
+  50% {
+    opacity: 0.45;
+    transform: scaleX(0.8);
+  }
+}

@@ -891,7 +891,7 @@ function App() {
           )}
           <footer>
             <span>
-              <Hexagon size={13} /> QUEST RANK <b>·</b> SKYBOUND ORBIT v1.5.0
+              <Hexagon size={13} /> QUEST RANK <b>·</b> CLASS COSMETICS v1.6.0
             </span>
             <p>An original adventure. Real skills. Limitless potential.</p>
             <span className="footer-disclaimer">
