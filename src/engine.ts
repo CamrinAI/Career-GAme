@@ -188,7 +188,7 @@ export function reward(
     rewards: [...save.rewards, key],
   };
 }
-export const levelFor = (xp: number) => 1 + Math.floor(xp / 300);
+export { levelFor } from "./leveling.ts";
 export function shuffled<T>(values: T[]): T[] {
   const a = [...values];
   for (let i = a.length - 1; i > 0; i--) {

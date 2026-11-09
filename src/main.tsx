@@ -12,7 +12,6 @@ import {
   Compass,
   Crosshair,
   Flame,
-  Gem,
   GraduationCap,
   Hexagon,
   Home,
@@ -79,6 +78,8 @@ import {
 import "./styles.css";
 import "./pixel.css";
 import "./adventure.css";
+import { LevelProgress } from "./LevelProgress";
+import { levelGain, levelProgress } from "./leveling";
 type Page =
   | "raid"
   | "pathfinder"
@@ -123,7 +124,9 @@ function App() {
   const [progressNotice, setProgressNotice] = useState<{
     title: string;
     detail: string;
+    levelUp?: boolean;
   } | null>(null);
+  const previousXP = useRef({ xp: save.xp, epoch });
   const previousRank = useRef(rankFor(save).rank);
   const previousPerks = useRef(
     perks
@@ -151,12 +154,30 @@ function App() {
     const newlyUnlocked = unlocked.filter(
       (perk) => !previousPerks.current.includes(perk.id),
     );
-    if (order[current.rank] > order[previousRank.current])
+    const gained = levelGain(previousXP.current, { xp: save.xp, epoch });
+    const replaced = previousXP.current.epoch !== epoch;
+    const rankUp = order[current.rank] > order[previousRank.current];
+    const unlockText = newlyUnlocked.length
+      ? `${newlyUnlocked.map((perk) => perk.name).join(" + ")} unlocked. Equip it in Hunter Profile.`
+      : "";
+    if (replaced) setProgressNotice(null);
+    else if (gained)
+      setProgressNotice({
+        title: `Level ${gained.to} reached!`,
+        detail: [
+          `+${gained.xpGained} XP · Level ${gained.from} → ${gained.to}.`,
+          rankUp ? `${current.rank}-rank awakened · ${current.title}.` : "",
+          unlockText,
+        ]
+          .filter(Boolean)
+          .join(" "),
+        levelUp: true,
+      });
+    else if (rankUp)
       setProgressNotice({
         title: `${current.rank}-rank awakened · ${current.title}`,
-        detail: newlyUnlocked.length
-          ? `${newlyUnlocked.map((perk) => perk.name).join(" + ")} unlocked. Equip it in Hunter Profile.`
-          : "Your learning milestones earned a new fictional rank.",
+        detail:
+          unlockText || "Your learning milestones earned a new fictional rank.",
       });
     else if (newlyUnlocked.length)
       setProgressNotice({
@@ -164,9 +185,10 @@ function App() {
         detail:
           "Visit Hunter Profile to equip a passive perk for your next battle.",
       });
+    previousXP.current = { xp: save.xp, epoch };
     previousRank.current = current.rank;
     previousPerks.current = unlocked.map((perk) => perk.id);
-  }, [save]);
+  }, [save, epoch]);
   useEffect(() => {
     const titles: Record<Page, string> = {
       raid: "Rift Raids",
@@ -337,10 +359,7 @@ function App() {
             <span className="solo">
               <span /> SOLO + CO-OP
             </span>
-            <div className="currency">
-              <Gem size={15} />
-              {save.xp.toLocaleString()} <span>XP</span>
-            </div>
+            <LevelProgress xp={save.xp} compact />
             <button
               className="icon-button"
               onClick={() => setSave((s) => ({ ...s, sound: !s.sound }))}
@@ -400,6 +419,7 @@ function App() {
                   <strong>Road to Cloud Sovereign</strong>
                 </div>
               </div>
+              <LevelProgress xp={save.xp} />
               <section className="panel nexus-raid-invite">
                 <div>
                   <span className="eyebrow">NEW · RIFT RAIDS BETA</span>
@@ -522,7 +542,11 @@ function App() {
                   <div className="stat-body">
                     <span>CHARACTER LEVEL</span>
                     <h3>
-                      {level} <small>{save.xp % 300} / 300 XP</small>
+                      {level}{" "}
+                      <small>
+                        {levelProgress(save.xp).remaining} XP to level{" "}
+                        {level + 1}
+                      </small>
                     </h3>
                     <Meter value={save.xp % 300} max={300} />
                   </div>
@@ -770,6 +794,7 @@ function App() {
                 title="Your potential, awakened."
                 sub="Your character grows with every step you take."
               />
+              <LevelProgress xp={save.xp} />
               <section className="profile-layout">
                 <div className="panel profile-panel">
                   <div className="portrait">
@@ -891,7 +916,7 @@ function App() {
           )}
           <footer>
             <span>
-              <Hexagon size={13} /> QUEST RANK <b>·</b> CLASS COSMETICS v1.6.0
+              <Hexagon size={13} /> QUEST RANK <b>·</b> LEVEL UP v1.7.0
             </span>
             <p>An original adventure. Real skills. Limitless potential.</p>
             <span className="footer-disclaimer">
@@ -901,10 +926,15 @@ function App() {
         </main>
       </div>
       {progressNotice && (
-        <div className="ascension-toast" role="status">
+        <div
+          className={`ascension-toast ${progressNotice.levelUp ? "level-up-toast" : ""}`}
+          role="status"
+        >
           <Trophy size={24} />
           <div>
-            <span>MILESTONE EARNED</span>
+            <span>
+              {progressNotice.levelUp ? "LEVEL UP" : "MILESTONE EARNED"}
+            </span>
             <strong>{progressNotice.title}</strong>
             <small>{progressNotice.detail}</small>
           </div>

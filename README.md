@@ -1,4 +1,4 @@
-# Quest Rank · Class Cosmetics 1.6.0
+# Quest Rank · Level Up 1.7.0
 
 A solo-first pixel adventure learning RPG. Awaken a Cloud Initiate, study identity and access fundamentals, review mistakes, and challenge the IAM Warden in the Citadel of Identity.
 
@@ -15,6 +15,8 @@ The Skybound graphics release follows the supplied visual reference: detailed fl
 Skybound Orbit keeps the bright palette while adding a futuristic eco-station, space explorer suits, and a dedicated Nurse Sentinel medic model. Raid selection includes model thumbnails and a selected-character preview; the medic also renders through the shared raid character component. See `ORBIT-UPDATE.md`.
 
 The class cosmetics update gives every role a distinct model: Cloud Warden cloud armor, Nurse Sentinel medic gear, Software Vanguard developer outfit and AI Arcanist neural coat with a separate animated holo assistant. Appearance descriptions and assets are shared through `src/appearances.ts`. See `CLASS-COSMETICS.md`.
+
+The Level Up release adds a persistent level/XP HUD, prominent Nexus and profile progress panels, XP-to-next-level guidance, a reward guide and a level-up celebration. Existing XP and the 300-XP level curve carry forward. See `LEVELING-UPDATE.md`.
 
 ## Run, test and build
 
