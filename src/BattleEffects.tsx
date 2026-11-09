@@ -1,0 +1,77 @@
+import { Shield, Sparkles, Swords, Zap } from "lucide-react";
+import { Hunter } from "./Scenery";
+import type { Action } from "./engine";
+export type BattleCue = {
+  serial: number;
+  action: Action;
+  correct: boolean;
+  damage: number;
+  hpLoss: number;
+  phaseShift: boolean;
+};
+export function BattleEffects({ cue }: { cue: BattleCue | null }) {
+  if (!cue) return null;
+  const kind =
+    cue.action === "defend" ? "guard" : !cue.correct ? "counter" : cue.action;
+  const Icon =
+    kind === "guard"
+      ? Shield
+      : kind === "ultimate"
+        ? Sparkles
+        : kind === "special"
+          ? Zap
+          : Swords;
+  return (
+    <div
+      key={cue.serial}
+      className={`battle-effects ${kind}`}
+      aria-hidden="true"
+    >
+      {kind === "ultimate" && (
+        <div className="pixel-cut-in">
+          <Hunter />
+          <div>
+            <small>NEURAL LINK · FULL CHARGE</small>
+            <strong>Identity rupture</strong>
+          </div>
+        </div>
+      )}
+      <div className="target-lock">
+        <i />
+        <i />
+        <i />
+        <i />
+      </div>
+      <div className="pixel-impact">
+        <i />
+        <i />
+        <i />
+        <i />
+      </div>
+      <div className="energy-trail" />
+      <div className="skill-flash">
+        <Icon size={35} />
+        <strong>
+          {kind === "guard"
+            ? "AEGIS GUARD"
+            : kind === "counter"
+              ? "COUNTERATTACK"
+              : kind === "ultimate"
+                ? "IDENTITY RUPTURE"
+                : kind === "special"
+                  ? "ARC NOVA"
+                  : "ARC STRIKE"}
+        </strong>
+      </div>
+      {cue.damage > 0 && (
+        <span className="damage-pop boss-damage">−{cue.damage}</span>
+      )}
+      {cue.hpLoss > 0 && (
+        <span className="damage-pop hunter-damage">−{cue.hpLoss}</span>
+      )}
+      {cue.phaseShift && (
+        <div className="phase-warning">PHASE II · THE WARDEN AWAKENS</div>
+      )}
+    </div>
+  );
+}
